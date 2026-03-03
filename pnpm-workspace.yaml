@@ -1,0 +1,4 @@
+ignoredBuiltDependencies:
+  - esbuild
+  - unrs-resolver
+  - workerd
