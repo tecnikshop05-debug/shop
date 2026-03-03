@@ -115,7 +115,12 @@ function FacebookReviewCard({
 
         {image && (
           <div className="mt-3 max-w-[400px] rounded-xl overflow-hidden border border-gray-200 shadow-sm cursor-pointer hover:opacity-95 transition-opacity">
-            <img src={image} alt="Review" className="w-full h-auto block" />
+            <img
+              src={image}
+              alt="Review"
+              className="w-full h-auto block"
+              loading="lazy"
+            />
           </div>
         )}
 

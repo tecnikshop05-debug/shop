@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {
   useLoaderData,
   useActionData,
@@ -1134,6 +1134,38 @@ export default function Product() {
         </div>
       </div>
 
+      {/* ════ PRODUCT SHOWCASE ════ */}
+      <section className="sec">
+        <div className="container">
+          <div style={{textAlign: 'center', marginBottom: '32px'}}>
+            <div className="eyebrow" style={{justifyContent: 'center'}}>
+              Sabemos que quieres verlo
+            </div>
+            <h2 className="h2">Así funciona nuestro CleanBrush</h2>
+          </div>
+          <div
+            className="video-wrapper"
+            style={{
+              maxWidth: '800px',
+              margin: '0 auto',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px -10px rgba(0,0,0,0.15)',
+            }}
+          >
+            <LazyVideo
+              src="/snaptik_7319789064893369646_v3.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              style={{width: '100%', height: 'auto', display: 'block'}}
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ════ TECH SECTION ════ */}
       <section className="sec">
         <div className="container">
@@ -1214,6 +1246,7 @@ export default function Product() {
               <img
                 src="/images/tech-visual.webp"
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
               <div className="tech-uv-ring"></div>
             </div>
@@ -1239,7 +1272,7 @@ export default function Product() {
 
           <div className="transform-block">
             <div className="transform-img">
-              <img src="/images/transform-1.webp" />
+              <img src="/images/transform-1.webp" loading="lazy" />
             </div>
             <div>
               <div className="eyebrow">Organización</div>
@@ -1308,7 +1341,7 @@ export default function Product() {
 
           <div className="transform-block rev">
             <div className="transform-img">
-              <img src="/images/transform-2.webp" />
+              <img src="/images/transform-2.webp" loading="lazy" />
             </div>
             <div>
               <div className="eyebrow">Familia</div>
@@ -2011,3 +2044,34 @@ const PRODUCT_QUERY = `#graphql
   }
   ${PRODUCT_FRAGMENT}
 ` as const;
+
+function LazyVideo(props: React.VideoHTMLAttributes<HTMLVideoElement>) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: '200px',
+      },
+    );
+
+    if (videoRef.current) {
+      observer.observe(videoRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  return (
+    <video ref={videoRef} {...props} src={isVisible ? props.src : undefined} />
+  );
+}
