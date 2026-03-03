@@ -2159,7 +2159,14 @@ function LazyVideo(props: React.VideoHTMLAttributes<HTMLVideoElement>) {
     };
   }, []);
 
-  return (
-    <video ref={videoRef} {...props} src={isVisible ? props.src : undefined} />
-  );
+  // En móviles (iOS) a veces se ve negro si no tiene poster.
+  // Forzamos el primer frame con #t=0.001 si está visible.
+  const videoSrc =
+    isVisible && props.src
+      ? props.src.includes('#')
+        ? props.src
+        : `${props.src}#t=0.001`
+      : undefined;
+
+  return <video ref={videoRef} {...props} src={videoSrc} preload="metadata" />;
 }
