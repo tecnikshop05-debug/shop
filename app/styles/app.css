@@ -1015,22 +1015,25 @@ body {
 }
 
 .micro {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 18px;
+  margin-bottom: 18px;
 }
 .micro-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 5px;
+  justify-content: center;
+  text-align: center;
+  gap: 6px;
   font-family: var(--fd);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   color: var(--t2);
+  line-height: 1.2;
 }
 
 /* Accordions */
@@ -1963,4 +1966,371 @@ body {
 }
 .bg-blue-500 {
   background: #3b82f6;
+}
+
+/* 
+  =========================================
+  NEW STYLES (Added per user request)
+  =========================================
+*/
+
+/* Product Selector */
+.selector-wrap {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.selector-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.selector-card {
+  background: #fdfdfd;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.selector-card.active {
+  border: 2px solid #000;
+  background: #f9fafb;
+  padding: 15px; /* Adjust for border width change */
+}
+
+.selector-badge {
+  position: absolute;
+  top: -10px;
+  right: -5px;
+  background: #ccff00; /* Neon yellow */
+  color: #000;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transform: rotate(3deg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.selector-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selector-hd {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #6b7280;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.selector-pr {
+  font-size: 24px;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.selector-sv {
+  font-size: 12px;
+  color: #059669; /* Green text */
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Proof Strip Dark */
+.proof.proof-dark {
+  background: #0d0d0d;
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-size: 13px;
+  border-radius: 0;
+}
+
+.proof.proof-dark .proof-item {
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proof-highlight {
+  color: #ccff00; /* Neon yellow highlight */
+  font-weight: 700;
+}
+
+/* Trust Grid Bordered */
+.trust.trust-grid-bordered {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e5e7eb; /* Border color via gap */
+  gap: 1px;
+}
+
+.trust.trust-grid-bordered .trust-item {
+  background: #f9fafb;
+  border: none; /* Remove default borders */
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.trust.trust-grid-bordered .trust-t {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #111827;
+}
+
+.trust.trust-grid-bordered .trust-d {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Proof Grid Layout */
+.proof.proof-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  background: #0d0d0d;
+  color: #fff;
+  padding: 24px 20px;
+  text-align: center;
+  justify-items: center;
+  border-radius: 0;
+}
+
+.proof-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.proof-sep-dot {
+  width: 4px;
+  height: 4px;
+  background: #4b5563;
+  border-radius: 50%;
+  margin: 0 4px;
+}
+
+.icon-purple {
+  color: #a78bfa; /* Violet-400 */
+}
+
+/* Trust Grid Refinements */
+.trust.trust-grid-bordered {
+  margin-top: 0; /* Remove top margin to stick to Proof Strip if desired, or keep gap */
+  border-top: none; /* If they touch */
+}
+
+@media (min-width: 700px) {
+  .trust.trust-grid-bordered {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* 
+  =========================================
+  NEW STYLES (Added per user request)
+  =========================================
+*/
+
+/* Product Selector */
+.selector-wrap {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.selector-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.selector-card {
+  background: #fdfdfd;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100px;
+}
+
+.selector-card.active {
+  border: 2px solid #000;
+  background: #f9fafb;
+  padding: 15px; /* Adjust for border width change */
+}
+
+.selector-badge {
+  position: absolute;
+  top: -10px;
+  right: -5px;
+  background: #ccff00; /* Neon yellow */
+  color: #000;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transform: rotate(3deg);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.selector-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.selector-hd {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #6b7280;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.selector-pr {
+  font-size: 24px;
+  font-weight: 900;
+  color: #111827;
+  line-height: 1;
+  margin-top: 4px;
+}
+
+.selector-sv {
+  font-size: 12px;
+  color: #059669; /* Green text */
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Proof Strip Dark */
+.proof.proof-dark {
+  background: #0d0d0d;
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  font-size: 13px;
+  border-radius: 0;
+}
+
+.proof.proof-dark .proof-item {
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.proof-highlight {
+  color: #ccff00; /* Neon yellow highlight */
+  font-weight: 700;
+}
+
+/* Trust Grid Bordered */
+.trust.trust-grid-bordered {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #e5e7eb; /* Border color via gap */
+  gap: 1px;
+}
+
+.trust.trust-grid-bordered .trust-item {
+  background: #f9fafb;
+  border: none; /* Remove default borders */
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.trust.trust-grid-bordered .trust-t {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #111827;
+}
+
+.trust.trust-grid-bordered .trust-d {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+@media (min-width: 700px) {
+  .trust.trust-grid-bordered {
+    /* Keep 2 columns as per request/image on mobile? Image shows 2x2. 
+        Usually on desktop it might be 4x1. 
+        If the image shows 2x2, I should probably enforce 2x2 or 4x1 depending on what "image" implies for responsiveness.
+        The prompt says "deberia verse con sus bordes, la seccion de proof también deberia verse en grilla como la image que te compartí".
+        The image shows a 2x2 grid. I will stick to 2 columns for now as it matches the "2x2" look.
+     */
+    grid-template-columns: 1fr 1fr;
+  }
 }

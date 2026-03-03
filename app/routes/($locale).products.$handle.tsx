@@ -630,8 +630,16 @@ export default function Product() {
 
       {/* ════ NAV ════ */}
       <nav className="nav">
-        <a className="logo" href="/">
-          TEC<span className="nik">NIK</span>
+        <a
+          className="logo"
+          href="/"
+          style={{display: 'flex', alignItems: 'center'}}
+        >
+          <img
+            src="/images/LOGO%20FINAL...png"
+            alt="TECNIK"
+            style={{height: '32px', width: 'auto'}}
+          />
         </a>
         <div className="nav-r">
           <a className="nav-link" href="#reviews">
@@ -687,45 +695,104 @@ export default function Product() {
 
         {/* Info */}
         <div className="info">
-          <div className="eyebrow">
+          <div className="eyebrow" style={{marginBottom: '10px'}}>
             Organiza e higieniza todo el baño · UV-C Clínico
           </div>
 
           <h1 className="h1" style={{marginBottom: '10px'}}>
             {product.title}
           </h1>
-          <p className="body" style={{maxWidth: '420px', marginBottom: '16px'}}>
+
+          <div
+            className="rating-row"
+            style={{marginBottom: '16px', paddingBottom: '0', border: 'none'}}
+          >
+            <span className="stars">★★★★★</span>
+            <span className="r-num">4.9</span>
+            <span className="r-ct">(+100 clientes felices 🇨🇴)</span>
+          </div>
+
+          <p
+            className="body"
+            style={{
+              maxWidth: '420px',
+              marginBottom: '20px',
+              fontSize: '15px',
+              color: '#4B5563',
+            }}
+          >
             Mata el 99.9% de bacterias con luz UV-C clínica. Dispensador
             automático, carga solar + USB y 5 ranuras organizadoras. Todo el
             baño en orden, sin esfuerzo.
           </p>
 
-          <div className="rating-row">
-            <span className="stars">★★★★★</span>
-            <span className="r-num">4.9</span>
-            <span className="r-ct">
-              +1.200 clientes · <a href="#reviews">Ver reseñas</a>
-            </span>
-          </div>
-
-          <div className="price-group">
-            <span className="price-now">
+          <div
+            className="price-group"
+            style={{
+              marginBottom: '20px',
+              gap: '12px',
+              alignItems: 'center',
+              display: 'flex',
+              flexWrap: 'wrap',
+            }}
+          >
+            <span
+              className="price-now"
+              style={{
+                fontSize: '48px',
+                letterSpacing: '-1.5px',
+                fontWeight: 900,
+                color: '#0F172A',
+              }}
+            >
               {selectedKit === 2 ? '$179.900' : '$99.900'}
             </span>
-            <span className="price-old">
-              {selectedKit === 2 ? '$250.000' : '$125.000'}
-            </span>
-          </div>
-          <div className="price-save" style={{marginBottom: '16px'}}>
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              color="currentColor"
-            >
-              <use href="#i-check" />
-            </svg>
-            Te ahorras {selectedKit === 2 ? '$70.100' : '$25.100'} hoy
+            <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
+              <span
+                className="price-old"
+                style={{
+                  fontSize: '20px',
+                  color: '#64748B',
+                  textDecoration: 'line-through',
+                  fontWeight: 600,
+                  lineHeight: 1,
+                }}
+              >
+                {selectedKit === 2 ? '$250.000' : '$125.000'}
+              </span>
+              <div
+                style={{
+                  background: '#DCFCE7', // var(--confirm-bg)
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  width: 'fit-content',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    color: '#166534', // var(--confirm) darker
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  AHORRAS
+                </span>
+                <span
+                  style={{
+                    fontSize: '12px',
+                    fontWeight: 900,
+                    color: '#166534',
+                  }}
+                >
+                  {selectedKit === 2 ? '$70.100' : '$25.100'}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className="bullets">
@@ -786,20 +853,8 @@ export default function Product() {
                 className={`selector-card ${selectedKit === 1 ? 'active' : ''}`}
                 onClick={() => setSelectedKit(1)}
               >
-                <div className="selector-check">
-                  {selectedKit === 1 && (
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      color="#fff"
-                    >
-                      <use href="#i-check" />
-                    </svg>
-                  )}
-                </div>
                 <div className="selector-content">
-                  <div className="selector-hd">1 Unidad</div>
+                  <div className="selector-hd">1 UNIDAD</div>
                   <div className="selector-pr">$99.900</div>
                 </div>
               </div>
@@ -810,22 +865,10 @@ export default function Product() {
                 onClick={() => setSelectedKit(2)}
               >
                 <div className="selector-badge">MÁS VENDIDO</div>
-                <div className="selector-check">
-                  {selectedKit === 2 && (
-                    <svg
-                      width="12"
-                      height="12"
-                      viewBox="0 0 24 24"
-                      color="#fff"
-                    >
-                      <use href="#i-check" />
-                    </svg>
-                  )}
-                </div>
                 <div className="selector-content">
-                  <div className="selector-hd">2 Unidades</div>
+                  <div className="selector-hd">2 UNIDADES</div>
                   <div className="selector-pr">$179.900</div>
-                  <div className="selector-sv">Ahorra 10% extra</div>
+                  <div className="selector-sv">Ahorra extra 10%</div>
                 </div>
               </div>
             </div>
@@ -881,36 +924,39 @@ export default function Product() {
           <div className="micro">
             <div className="micro-item">
               <svg
-                width="12"
-                height="12"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 color="var(--blue)"
+                style={{marginBottom: '2px'}}
               >
                 <use href="#i-ship" />
-              </svg>{' '}
-              2–4 días
+              </svg>
+              <span>2–4 días</span>
             </div>
             <div className="micro-item">
               <svg
-                width="12"
-                height="12"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 color="var(--blue)"
+                style={{marginBottom: '2px'}}
               >
                 <use href="#i-lock" />
-              </svg>{' '}
-              Pago al recibir
+              </svg>
+              <span>Pago al recibir</span>
             </div>
             <div className="micro-item">
               <svg
-                width="12"
-                height="12"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 color="var(--blue)"
+                style={{marginBottom: '2px'}}
               >
                 <use href="#i-shield" />
-              </svg>{' '}
-              30 días garantía
+              </svg>
+              <span>30 días garantía</span>
             </div>
           </div>
 
@@ -925,7 +971,10 @@ export default function Product() {
                 Detalles Técnicos <span className="acc-ic">+</span>
               </button>
               {openAcc === 'tech' && (
-                <div className="acc-body">
+                <div
+                  className="acc-body open"
+                  style={{maxHeight: '800px', paddingBottom: '16px'}}
+                >
                   <ul>
                     <li>
                       <strong>Dimensiones:</strong> 19 × 12.5 × 4.7 cm
@@ -962,7 +1011,10 @@ export default function Product() {
                 Envío y Garantía <span className="acc-ic">+</span>
               </button>
               {openAcc === 'shipping' && (
-                <div className="acc-body">
+                <div
+                  className="acc-body open"
+                  style={{maxHeight: '800px', paddingBottom: '16px'}}
+                >
                   <p style={{marginBottom: '8px'}}>
                     <strong>Envío:</strong> Gratis a toda Colombia. 2–5 días
                     hábiles. Bogotá, Medellín, Cali, Barranquilla generalmente
@@ -981,46 +1033,45 @@ export default function Product() {
       </section>
 
       {/* ════ PROOF STRIP ════ */}
-      <div className="proof">
-        <div className="proof-item">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            className="text-confirm"
-          >
-            <use href="#i-check" />
-          </svg>
-          <strong>+15,000</strong> <em>Clientes felices</em>
+      <div className="proof proof-grid">
+        <div className="proof-cell">
+          <span className="stars" style={{color: '#ffcc00'}}>
+            ★★★★★
+          </span>
+          <strong>4.9 / 5</strong>
+          <span className="proof-sep-dot"></span>
+          <span className="proof-highlight">+1.200</span>{' '}
+          <span style={{marginLeft: '4px'}}>pedidos este mes</span>
         </div>
-        <div className="proof-sep"></div>
-        <div className="proof-item">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            className="text-confirm"
+        <div className="proof-cell">
+          <span style={{fontSize: '16px', marginRight: '6px'}}>🇨🇴</span>
+          Enviamos a{' '}
+          <span
+            className="proof-highlight"
+            style={{marginLeft: '4px', color: '#F59E0B'}}
           >
-            <use href="#i-check" />
-          </svg>
-          <strong>4.9/5</strong> <em>Calificación promedio</em>
+            toda Colombia
+          </span>
         </div>
-        <div className="proof-sep"></div>
-        <div className="proof-item">
+        <div className="proof-cell">
           <svg
-            width="16"
-            height="16"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
-            className="text-confirm"
+            className="icon-purple"
+            style={{marginRight: '6px'}}
           >
-            <use href="#i-check" />
+            <use href="#i-ship" />
           </svg>
-          <strong>Garantía</strong> <em>de satisfacción 30 días</em>
+          <span className="proof-highlight" style={{color: '#F59E0B'}}>
+            Contraentrega
+          </span>{' '}
+          <span style={{marginLeft: '4px'}}>garantizada</span>
         </div>
       </div>
 
       {/* ════ TRUST STRIP ════ */}
-      <div className="trust">
+      <div className="trust trust-grid-bordered">
         <div className="trust-item">
           <div className="text-blue">
             <svg
