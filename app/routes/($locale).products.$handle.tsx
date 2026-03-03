@@ -696,21 +696,32 @@ export default function Product() {
         {/* Info */}
         <div className="info">
           <div className="eyebrow" style={{marginBottom: '10px'}}>
-            Organiza e higieniza todo el baño · UV-C Clínico
+            {product.title} Original
           </div>
 
           <h1 className="h1" style={{marginBottom: '10px'}}>
-            {product.title}
+            Elimina el 99.9% de bacterias y organiza tu baño en segundos
           </h1>
 
-          <div
+          <a
+            href="#reviews"
             className="rating-row"
-            style={{marginBottom: '16px', paddingBottom: '0', border: 'none'}}
+            style={{
+              marginBottom: '16px',
+              paddingBottom: '0',
+              border: 'none',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+            }}
           >
             <span className="stars">★★★★★</span>
             <span className="r-num">4.9</span>
-            <span className="r-ct">(+100 clientes felices 🇨🇴)</span>
-          </div>
+            <span className="r-ct" style={{textDecoration: 'underline'}}>
+              (+100 clientes felices 🇨🇴)
+            </span>
+          </a>
 
           <p
             className="body"
@@ -905,21 +916,6 @@ export default function Product() {
               Envío Gratis + Pago al Recibir
             </span>
           </button>
-          <button
-            className="btn btn-wa btn-lg"
-            style={{width: '100%', borderRadius: '6px'}}
-            onClick={() =>
-              window.open(
-                'https://wa.me/573000000000?text=Hola! Quiero pedir el CleanBrush UV',
-                '_blank',
-              )
-            }
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" color="#fff">
-              <use href="#i-wa" />
-            </svg>
-            Preguntar por WhatsApp
-          </button>
 
           <div className="micro">
             <div className="micro-item">
@@ -1033,106 +1029,167 @@ export default function Product() {
       </section>
 
       {/* ════ PROOF STRIP ════ */}
-      <div className="proof proof-grid">
-        <div className="proof-cell">
-          <span className="stars" style={{color: '#ffcc00'}}>
-            ★★★★★
-          </span>
-          <strong>4.9 / 5</strong>
-          <span className="proof-sep-dot"></span>
-          <span className="proof-highlight">+1.200</span>{' '}
-          <span style={{marginLeft: '4px'}}>pedidos este mes</span>
-        </div>
-        <div className="proof-cell">
-          <span style={{fontSize: '16px', marginRight: '6px'}}>🇨🇴</span>
-          Enviamos a{' '}
-          <span
-            className="proof-highlight"
-            style={{marginLeft: '4px', color: '#F59E0B'}}
+      <div
+        className="proof proof-grid flex-row"
+        style={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          overflowX: 'auto',
+          gap: '0',
+          borderBottom: '1px solid #e5e7eb',
+        }}
+      >
+        <a
+          href="#reviews"
+          className="proof-cell"
+          style={{
+            textDecoration: 'none',
+            color: 'inherit',
+            cursor: 'pointer',
+            flex: '1 1 0',
+            minWidth: '0',
+            padding: '12px 4px',
+            borderRight: '1px solid #e5e7eb',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              lineHeight: '1.2',
+            }}
           >
-            toda Colombia
-          </span>
-        </div>
-        <div className="proof-cell">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            className="icon-purple"
-            style={{marginRight: '6px'}}
+            <span
+              className="stars"
+              style={{color: '#ffcc00', fontSize: '14px'}}
+            >
+              ★★★★★
+            </span>
+            <strong style={{fontSize: '13px'}}>4.9 / 5</strong>
+            <span style={{fontSize: '11px', color: '#666', marginTop: '2px'}}>
+              +1.200 pedidos
+            </span>
+          </div>
+        </a>
+
+        <div
+          className="proof-cell"
+          style={{
+            flex: '1 1 0',
+            minWidth: '0',
+            padding: '12px 4px',
+            borderRight: '1px solid #e5e7eb',
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              lineHeight: '1.2',
+            }}
           >
-            <use href="#i-ship" />
-          </svg>
-          <span className="proof-highlight" style={{color: '#F59E0B'}}>
-            Contraentrega
-          </span>{' '}
-          <span style={{marginLeft: '4px'}}>garantizada</span>
+            <span style={{fontSize: '16px'}}>🇨🇴</span>
+            <strong style={{fontSize: '13px'}}>Envíos Gratis</strong>
+            <span style={{fontSize: '11px', color: '#666', marginTop: '2px'}}>
+              Todo el país
+            </span>
+          </div>
+        </div>
+
+        <div
+          className="proof-cell"
+          style={{flex: '1 1 0', minWidth: '0', padding: '12px 4px'}}
+        >
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              lineHeight: '1.2',
+            }}
+          >
+            <div className="text-blue" style={{marginBottom: '2px'}}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+            </div>
+            <strong style={{fontSize: '13px'}}>Garantía</strong>
+            <span style={{fontSize: '11px', color: '#666', marginTop: '2px'}}>
+              30 días
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* ════ TRUST STRIP ════ */}
-      <div className="trust trust-grid-bordered">
-        <div className="trust-item">
-          <div className="text-blue">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="mx-auto"
-              color="currentColor"
-            >
-              <use href="#i-ship" />
-            </svg>
+      {/* ════ UGC SECTION ════ */}
+      <section className="sec" style={{paddingBottom: '20px'}}>
+        <div className="container">
+          <div className="text-center mb-32">
+            <div className="eyebrow justify-center mb-10">HISTORIAS REALES</div>
+            <h2 className="h2">
+              De cepillos tirados en un vaso a baño de revista Estas familias ya
+              lo cambiaron. En 2 minutos de instalación.
+            </h2>
           </div>
-          <div className="trust-t">Envío Gratis</div>
-          <div className="trust-d">A toda Colombia</div>
-        </div>
-        <div className="trust-item">
-          <div className="text-blue">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="mx-auto"
-              color="currentColor"
-            >
-              <use href="#i-lock" />
-            </svg>
+          <div
+            className="ugc-scroll"
+            style={{
+              display: 'flex',
+              gap: '16px',
+              overflowX: 'auto',
+              paddingBottom: '20px',
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none', // Firefox
+              msOverflowStyle: 'none', // IE/Edge
+            }}
+          >
+            {[
+              '/snaptik_7577863751999753479_v3.mp4',
+              '/snaptik_7513300600126180609_v3.mp4',
+              '/videoplayback.mp4',
+            ].map((videoSrc, idx) => (
+              <div
+                key={idx}
+                style={{
+                  minWidth: '280px',
+                  width: '70%',
+                  maxWidth: '320px',
+                  scrollSnapAlign: 'center',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  position: 'relative',
+                  aspectRatio: '9/16',
+                  backgroundColor: '#000',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                }}
+              >
+                <LazyVideo
+                  src={videoSrc}
+                  controls
+                  playsInline
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                  }}
+                />
+              </div>
+            ))}
           </div>
-          <div className="trust-t">Pago al Recibir</div>
-          <div className="trust-d">Efectivo en casa</div>
         </div>
-        <div className="trust-item">
-          <div className="text-blue">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="mx-auto"
-              color="currentColor"
-            >
-              <use href="#i-shield" />
-            </svg>
-          </div>
-          <div className="trust-t">Garantía Total</div>
-          <div className="trust-d">30 días de prueba</div>
-        </div>
-        <div className="trust-item">
-          <div className="text-wa">
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              className="mx-auto"
-              color="currentColor"
-            >
-              <use href="#i-wa" />
-            </svg>
-          </div>
-          <div className="trust-t">Soporte WhatsApp</div>
-          <div className="trust-d">Atención rápida</div>
-        </div>
-      </div>
+      </section>
 
       {/* ════ PRODUCT SHOWCASE ════ */}
       <section className="sec">
@@ -1162,94 +1219,6 @@ export default function Product() {
               controls
               style={{width: '100%', height: 'auto', display: 'block'}}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* ════ TECH SECTION ════ */}
-      <section className="sec">
-        <div className="container">
-          <div className="tech-grid">
-            <div>
-              <div className="eyebrow">Cómo funciona</div>
-              <h2 className="h2" style={{marginBottom: '14px'}}>
-                Tecnología Clínica.
-                <br />
-                Cero Esfuerzo.
-              </h2>
-              <p className="body" style={{maxWidth: '440px'}}>
-                No es una luz azul decorativa. Es radiación UV-C (253.7 nm) que
-                rompe el ADN de bacterias y virus. Lo mejor:{' '}
-                <strong>no tienes que hacer nada</strong>.
-              </p>
-              <ul className="tech-benefits">
-                <li className="tech-benefit">
-                  <div className="tech-benefit-ico">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      color="var(--blue)"
-                    >
-                      <use href="#i-robot" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="tech-benefit-t">Automatización Total</div>
-                    <div className="tech-benefit-d">
-                      Terminas de cepillarte, lo guardas y listo. El sensor
-                      activa la desinfección por ti. Sin botones, sin olvidos.
-                    </div>
-                  </div>
-                </li>
-                <li className="tech-benefit">
-                  <div className="tech-benefit-ico">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      color="var(--uv)"
-                    >
-                      <use href="#i-micro" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="tech-benefit-t">UV-C Real</div>
-                    <div className="tech-benefit-d">
-                      A diferencia de copias baratas, CleanBrush usa UV-C real
-                      que penetra las cerdas densas donde el peróxido no llega.
-                    </div>
-                  </div>
-                </li>
-                <li className="tech-benefit">
-                  <div className="tech-benefit-ico">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      color="var(--blue)"
-                    >
-                      <use href="#i-solar" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="tech-benefit-t">Carga Solar Infinita</div>
-                    <div className="tech-benefit-d">
-                      Se alimenta del bombillo del baño. Instálalo una vez y
-                      olvídate de los cables para siempre.
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div className="tech-visual">
-              <img
-                src="/images/tech-visual.webp"
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-              <div className="tech-uv-ring"></div>
-            </div>
           </div>
         </div>
       </section>
@@ -1407,6 +1376,94 @@ export default function Product() {
         </div>
       </section>
 
+      {/* ════ TECH SECTION ════ */}
+      <section className="sec">
+        <div className="container">
+          <div className="tech-grid">
+            <div>
+              <div className="eyebrow">Cómo funciona</div>
+              <h2 className="h2" style={{marginBottom: '14px'}}>
+                Tecnología Clínica.
+                <br />
+                Cero Esfuerzo.
+              </h2>
+              <p className="body" style={{maxWidth: '440px'}}>
+                No es una luz azul decorativa. Es radiación UV-C (253.7 nm) que
+                rompe el ADN de bacterias y virus. Lo mejor:{' '}
+                <strong>no tienes que hacer nada</strong>.
+              </p>
+              <ul className="tech-benefits">
+                <li className="tech-benefit">
+                  <div className="tech-benefit-ico">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      color="var(--blue)"
+                    >
+                      <use href="#i-robot" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="tech-benefit-t">Automatización Total</div>
+                    <div className="tech-benefit-d">
+                      Terminas de cepillarte, lo guardas y listo. El sensor
+                      activa la desinfección por ti. Sin botones, sin olvidos.
+                    </div>
+                  </div>
+                </li>
+                <li className="tech-benefit">
+                  <div className="tech-benefit-ico">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      color="var(--uv)"
+                    >
+                      <use href="#i-micro" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="tech-benefit-t">UV-C Real</div>
+                    <div className="tech-benefit-d">
+                      A diferencia de copias baratas, CleanBrush usa UV-C real
+                      que penetra las cerdas densas donde el peróxido no llega.
+                    </div>
+                  </div>
+                </li>
+                <li className="tech-benefit">
+                  <div className="tech-benefit-ico">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      color="var(--blue)"
+                    >
+                      <use href="#i-solar" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="tech-benefit-t">Carga Solar Infinita</div>
+                    <div className="tech-benefit-d">
+                      Se alimenta del bombillo del baño. Instálalo una vez y
+                      olvídate de los cables para siempre.
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div className="tech-visual">
+              <img
+                src="/images/tech-visual.webp"
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+              <div className="tech-uv-ring"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ════ COMPARISON ════ */}
       <section className="sec">
         <div className="container">
@@ -1555,20 +1612,9 @@ export default function Product() {
                 Aquí las resolvemos.
               </h2>
               <p className="body faq-desc">
-                Si no encuentras tu respuesta, escríbenos por WhatsApp.
-                Respondemos al momento.
+                Si no encuentras tu respuesta, escríbenos a
+                tecnikshop05@gmail.com. Respondemos al momento.
               </p>
-              <button
-                className="btn btn-wa btn-lg"
-                onClick={() =>
-                  window.open('https://wa.me/573000000000', '_blank')
-                }
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" color="#fff">
-                  <use href="#i-wa" />
-                </svg>
-                WhatsApp directo
-              </button>
             </div>
             <div>
               {[
@@ -1691,13 +1737,56 @@ export default function Product() {
                 <div className="flex-1">
                   <div className="order-product-title">{product.title}</div>
                   <div className="order-product-price">
-                    <ProductPrice price={selectedVariant?.price} />
+                    {selectedKit === 2 ? '$179.900' : '$99.900'}
                   </div>
                 </div>
-                <div className="order-savings">
-                  Ahorra
-                  <br />
-                  10%
+                {selectedKit === 2 && (
+                  <div className="order-savings">
+                    Ahorra
+                    <br />
+                    10%
+                  </div>
+                )}
+              </div>
+
+              {/* Selector de oferta inline */}
+              <div className="mb-4">
+                <label className="order-label mb-2 block">
+                  Selecciona tu oferta:
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div
+                    className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                      selectedKit === 1
+                        ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                        : 'border-gray-200 hover:border-blue-300 bg-white'
+                    }`}
+                    onClick={() => setSelectedKit(1)}
+                  >
+                    <div className="text-sm font-bold text-gray-900">
+                      1 UNIDAD
+                    </div>
+                    <div className="text-sm text-gray-600">$99.900</div>
+                  </div>
+                  <div
+                    className={`border rounded-lg p-3 cursor-pointer transition-all relative ${
+                      selectedKit === 2
+                        ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                        : 'border-gray-200 hover:border-blue-300 bg-white'
+                    }`}
+                    onClick={() => setSelectedKit(2)}
+                  >
+                    <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                      MÁS VENDIDO
+                    </div>
+                    <div className="text-sm font-bold text-gray-900">
+                      2 UNIDADES
+                    </div>
+                    <div className="text-sm text-gray-600">$179.900</div>
+                    <div className="text-[10px] text-green-600 font-bold mt-1">
+                      Ahorra extra
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1872,7 +1961,7 @@ export default function Product() {
           <div>
             <div className="footer-h">Enlaces</div>
             <div className="footer-links">
-              <a href="#">Rastrea tu pedido</a>
+              {/* <a href="#">Rastrea tu pedido</a> */}
               <a href="#">Política de Garantía</a>
               <a href="#">Términos y Condiciones</a>
             </div>
@@ -1880,8 +1969,7 @@ export default function Product() {
           <div>
             <div className="footer-h">Contacto</div>
             <div className="footer-links">
-              <a href="#">contacto@tecnik.co</a>
-              <a href="#">WhatsApp</a>
+              <a href="#">tecnikshop05@gmail.com</a>
             </div>
           </div>
         </div>

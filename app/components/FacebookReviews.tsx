@@ -79,6 +79,39 @@ export function FacebookReviews() {
               },
             ]}
           />
+
+          {/* Review 4 */}
+          <FacebookReviewCard
+            name="Andrés Felipe"
+            date="2 d"
+            avatar="A"
+            avatarColor="#F59E0B"
+            text="Tenía mis dudas sobre la luz UV, pero se siente la diferencia. El cepillo siempre está seco y limpio."
+            image="/images/KtjH3a8SwQ.webp"
+            likes={56}
+          />
+
+          {/* Review 5 */}
+          <FacebookReviewCard
+            name="Mariana López"
+            date="3 d"
+            avatar="M"
+            avatarColor="#EC4899"
+            text="Lo mejor es que no necesita cables. Se carga con la luz del baño y dura muchísimo. ¡Feliz con mi compra!"
+            image="/images/T76GHG2YJ3.webp"
+            likes={72}
+          />
+
+          {/* Review 6 */}
+          <FacebookReviewCard
+            name="Santiago Ruiz"
+            date="4 d"
+            avatar="S"
+            avatarColor="#3B82F6"
+            text="Compré uno para cada baño de la casa. El adhesivo es muy fuerte, no se ha movido ni un milímetro."
+            image="/images/XQcPi3ZxWC.webp"
+            likes={43}
+          />
         </div>
       </div>
     </section>

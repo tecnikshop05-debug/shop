@@ -30,6 +30,12 @@ export function OrderModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const [department, setDepartment] = useState('');
   const [city, setCity] = useState('');
+  const [localKit, setLocalKit] = useState(selectedKit);
+
+  // Sync prop changes
+  useEffect(() => {
+    setLocalKit(selectedKit);
+  }, [selectedKit]);
 
   // Reset form when opening
   useEffect(() => {
@@ -92,6 +98,8 @@ export function OrderModal({
     );
   }
 
+  const currentPrice = localKit === 2 ? '$179.900' : '$99.900';
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSubmitting) return;
@@ -101,8 +109,8 @@ export function OrderModal({
     if (variantId) {
       formData.append('variantId', variantId);
     }
-    formData.append('selectedKit', selectedKit.toString());
-    formData.append('price', price);
+    formData.append('selectedKit', localKit.toString());
+    formData.append('price', currentPrice);
     formData.append('action', 'create_order');
 
     // Append prefix to phone if not present (handled visually, but ensure data integrity)
@@ -128,7 +136,7 @@ export function OrderModal({
         aria-modal="true"
         aria-labelledby="modal-title"
       >
-        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+        <div className="p-4 border-b border-gray-300 flex justify-between items-center bg-gray-50">
           <h2 id="modal-title" className="text-lg font-bold text-gray-900">
             Finalizar Compra
           </h2>
@@ -169,9 +177,9 @@ export function OrderModal({
               </h3>
               <p className="text-sm text-blue-800">
                 <span className="font-bold">
-                  {selectedKit === 1 ? '1 Unidad' : '2 Unidades'}
+                  {localKit === 1 ? '1 Unidad' : '2 Unidades'}
                 </span>{' '}
-                — <span className="font-bold text-lg">{price}</span>
+                — <span className="font-bold text-lg">{currentPrice}</span>
               </p>
               <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
                 <svg
@@ -186,6 +194,45 @@ export function OrderModal({
                 </svg>
                 Pago contra entrega + Envío Gratis
               </p>
+            </div>
+          </div>
+
+          {/* Selector de oferta en el modal */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Selecciona tu oferta:
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <div
+                className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                  localKit === 1
+                    ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                    : 'border-gray-200 hover:border-blue-300'
+                }`}
+                onClick={() => setLocalKit(1)}
+              >
+                <div className="text-sm font-bold text-gray-900">1 UNIDAD</div>
+                <div className="text-sm text-gray-600">$99.900</div>
+              </div>
+              <div
+                className={`border rounded-lg p-3 cursor-pointer transition-all relative ${
+                  localKit === 2
+                    ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
+                    : 'border-gray-200 hover:border-blue-300'
+                }`}
+                onClick={() => setLocalKit(2)}
+              >
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+                  MÁS VENDIDO
+                </div>
+                <div className="text-sm font-bold text-gray-900">
+                  2 UNIDADES
+                </div>
+                <div className="text-sm text-gray-600">$179.900</div>
+                <div className="text-[10px] text-green-600 font-bold mt-1">
+                  Ahorra extra
+                </div>
+              </div>
             </div>
           </div>
 
@@ -313,7 +360,7 @@ export function OrderModal({
               </div>
             </div>
 
-            <div className="p-4 border-t bg-gray-50">
+            <div className="p-4 border-t border-gray-300 bg-gray-50">
               <button
                 disabled={isSubmitting}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[var(--confirm)] hover:bg-[#047857] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
