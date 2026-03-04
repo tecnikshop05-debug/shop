@@ -164,14 +164,12 @@ export function Layout({children}: {children?: React.ReactNode}) {
   const location = useLocation();
 
   useEffect(() => {
-    if (data?.facebookPixelId) {
+    // @ts-ignore
+    if (typeof window !== 'undefined' && window.fbq) {
       // @ts-ignore
-      if (window.fbq) {
-        // @ts-ignore
-        window.fbq('track', 'PageView');
-      }
+      window.fbq('track', 'PageView');
     }
-  }, [location, data?.facebookPixelId]);
+  }, [location.pathname]); // ← Solo pathname, no el objeto entero
 
   return (
     <html lang="en">
@@ -185,6 +183,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <Links />
         {data?.facebookPixelId && (
           <script
+            nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: `
                 !function(f,b,e,v,n,t,s)
