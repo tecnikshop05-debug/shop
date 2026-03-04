@@ -297,6 +297,9 @@ export async function loader(args: LoaderFunctionArgs) {
   const {context, request} = args;
   const {product} = criticalData;
 
+  // Generate a server-side event ID for deduplication
+  const eventId = `view_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
   if (product && context.waitUntil) {
     context.waitUntil(
       (async () => {
@@ -335,6 +338,7 @@ export async function loader(args: LoaderFunctionArgs) {
                 ? [variant.id.split('/').pop()!]
                 : [product.id.split('/').pop()!],
               content_type: 'product',
+              event_id: eventId,
             },
           });
         } catch (e) {
@@ -344,7 +348,7 @@ export async function loader(args: LoaderFunctionArgs) {
     );
   }
 
-  return {...deferredData, ...criticalData};
+  return {...deferredData, ...criticalData, eventId};
 }
 
 async function loadCriticalData({
@@ -633,7 +637,7 @@ function SvgSprite() {
 // ════════════════════════════════════════════════════════════════════════════
 
 export default function Product() {
-  const {product} = useLoaderData<typeof loader>();
+  const {product, eventId} = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const navigation = useNavigation();
   const actionData = useActionData<typeof action>() as
@@ -645,6 +649,32 @@ export default function Product() {
         simulated?: boolean;
       }
     | undefined;
+
+  // Client-side ViewContent tracking
+  useEffect(() => {
+    // @ts-ignore
+    if (window.fbq && product) {
+      const variant = product.selectedOrFirstAvailableVariant;
+      const price = variant?.price?.amount || '0';
+      const currency = variant?.price?.currencyCode || 'COP';
+
+      // @ts-ignore
+      window.fbq(
+        'track',
+        'ViewContent',
+        {
+          content_name: product.title,
+          content_ids: variant
+            ? [variant.id.split('/').pop()!]
+            : [product.id.split('/').pop()!],
+          content_type: 'product',
+          value: parseFloat(price),
+          currency: currency,
+        },
+        {eventID: eventId},
+      );
+    }
+  }, [product, eventId]);
 
   const selectedVariant = useOptimisticVariant(
     product.selectedOrFirstAvailableVariant,
