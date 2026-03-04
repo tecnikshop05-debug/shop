@@ -24,5 +24,7 @@ declare global {
     PUBLIC_CHECKOUT_DOMAIN: string;
     SHOPIFY_ADMIN_API_TOKEN: string;
     SHOPIFY_MYSHOPIFY_DOMAIN: string;
+    FACEBOOK_PIXEL_ID: string;
+    FACEBOOK_ACCESS_TOKEN: string;
   }
 }

@@ -21,6 +21,7 @@ import {FacebookReviews} from '~/components/FacebookReviews';
 import {PhoneNumberInput} from '~/components/PhoneNumberInput';
 import {DEPARTMENTS, CITIES} from '~/lib/colombia-locations';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {sendFacebookEvent, hashData} from '~/lib/facebook';
 
 // ════════════════════════════════════════════════════════════════════════════
 // ACTION (Create Order)
@@ -190,6 +191,56 @@ export async function action({request, context}: ActionFunctionArgs) {
         };
       }
 
+      // ----------------------------------------------------------------------
+      // Enviar evento de compra a Facebook CAPI
+      // ----------------------------------------------------------------------
+      try {
+        const clientIp =
+          request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+          request.headers.get('cf-connecting-ip') ||
+          '0.0.0.0';
+        const userAgent = request.headers.get('user-agent') || '';
+
+        // Obtener cookies fbc y fbp
+        const cookieHeader = request.headers.get('Cookie') || '';
+        const cookies = Object.fromEntries(
+          cookieHeader.split(';').map((c) => {
+            const [key, ...v] = c.split('=');
+            return [key.trim(), v.join('=')];
+          }),
+        );
+
+        await sendFacebookEvent(context.env, {
+          event_name: 'Purchase',
+          event_source_url: request.url,
+          user_data: {
+            em: hashData(`${phone.replace(/\D/g, '')}@no-email.com`), // Email generado
+            ph: hashData(phone),
+            fn: hashData(firstName),
+            ln: hashData(lastName),
+            ct: hashData(city),
+            st: hashData(province),
+            country: hashData('co'),
+            client_ip_address: clientIp,
+            client_user_agent: userAgent,
+            fbc: cookies._fbc,
+            fbp: cookies._fbp,
+          },
+          custom_data: {
+            currency: 'COP',
+            value: price,
+            order_id: json.order.id.toString(),
+            content_name: productTitle,
+            content_ids: variantId ? [variantId] : [],
+            content_type: 'product',
+            num_items: quantity,
+          },
+        });
+      } catch (fbError) {
+        console.error('Error enviando evento a Facebook:', fbError);
+        // No fallar la orden si falla el evento de Facebook
+      }
+
       return {
         success: true,
         orderId: json.order?.id,
@@ -229,6 +280,60 @@ export const meta = ({data}: {data: any}) => {
 export async function loader(args: LoaderFunctionArgs) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
+
+  // --------------------------------------------------------------------------
+  // Facebook CAPI: ViewContent
+  // --------------------------------------------------------------------------
+  const {context, request} = args;
+  const {product} = criticalData;
+
+  if (product) {
+    context.waitUntil(
+      (async () => {
+        try {
+          const clientIp =
+            request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+            request.headers.get('cf-connecting-ip') ||
+            '0.0.0.0';
+          const userAgent = request.headers.get('user-agent') || '';
+          const cookieHeader = request.headers.get('Cookie') || '';
+          const cookies = Object.fromEntries(
+            cookieHeader.split(';').map((c) => {
+              const [key, ...v] = c.split('=');
+              return [key.trim(), v.join('=')];
+            }),
+          );
+
+          const variant = product.selectedOrFirstAvailableVariant;
+          const price = variant?.price?.amount || '0';
+          const currency = variant?.price?.currencyCode || 'COP';
+
+          await sendFacebookEvent(context.env, {
+            event_name: 'ViewContent',
+            event_source_url: request.url,
+            user_data: {
+              client_ip_address: clientIp,
+              client_user_agent: userAgent,
+              fbc: cookies._fbc,
+              fbp: cookies._fbp,
+            },
+            custom_data: {
+              currency: currency,
+              value: parseFloat(price),
+              content_name: product.title,
+              content_ids: variant
+                ? [variant.id.split('/').pop()!]
+                : [product.id.split('/').pop()!],
+              content_type: 'product',
+            },
+          });
+        } catch (e) {
+          console.error('Error sending FB ViewContent:', e);
+        }
+      })(),
+    );
+  }
+
   return {...deferredData, ...criticalData};
 }
 
