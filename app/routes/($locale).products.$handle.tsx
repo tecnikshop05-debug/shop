@@ -156,6 +156,14 @@ export async function action({request, context}: ActionFunctionArgs) {
               source: 'shopify',
             },
           ],
+          note_attributes: [
+            {name: 'UTM source', value: utmSource},
+            {name: 'UTM medium', value: utmMedium},
+            {name: 'UTM campaign', value: utmCampaign},
+            {name: 'UTM content', value: utmContent},
+            {name: 'UTM term', value: utmTerm},
+            {name: 'utm_id', value: utmId},
+          ].filter((attr) => attr.value),
         },
       };
 
@@ -738,7 +746,7 @@ export default function Product() {
   const [timeLeft, setTimeLeft] = useState(23 * 3600 + 47 * 60 + 2);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeThumb, setActiveThumb] = useState(0);
-  const [selectedKit, setSelectedKit] = useState(2);
+  const [selectedKit, setSelectedKit] = useState(1);
   const [openAcc, setOpenAcc] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const thumbsRef = useRef<HTMLDivElement>(null);
