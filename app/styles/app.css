@@ -393,12 +393,14 @@
 }
 
 /* Base Styles Override for Product Pages (or Global) */
+html,
 body {
   font-family: var(--fb);
   background: var(--paper);
   color: var(--t1);
   font-size: 15px;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 /* Utility Classes from Reference */
