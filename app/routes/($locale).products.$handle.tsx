@@ -54,7 +54,9 @@ export async function action({request, context}: ActionFunctionArgs) {
     // Formatear teléfono a E.164 para Colombia
     const phone = `+57${phoneRaw.replace(/\D/g, '')}`;
 
-    const price = parseFloat(priceStr.replace(/[^0-9]/g, ''));
+    // El precio viene como string decimal (ej: "89900.0") desde MoneyV2.amount
+    // NO eliminar caracteres no numéricos, pues elimina el punto decimal.
+    const price = parseFloat(priceStr);
     const quantity = parseInt(selectedKit) === 2 ? 2 : 1;
     const unitPrice = price / quantity;
 
@@ -64,9 +66,31 @@ export async function action({request, context}: ActionFunctionArgs) {
       // Intentar crear orden via Admin API
       // Nota: Requiere SHOPIFY_ADMIN_API_TOKEN y PUBLIC_STORE_DOMAIN en variables de entorno
       const adminApiToken = context.env.SHOPIFY_ADMIN_API_TOKEN;
+
+      if (!adminApiToken) {
+        console.error(
+          'Error: SHOPIFY_ADMIN_API_TOKEN no está definido en las variables de entorno',
+        );
+        return {
+          success: false,
+          error:
+            'Error de configuración: Falta SHOPIFY_ADMIN_API_TOKEN en .env',
+        };
+      }
+
       // Usar SHOPIFY_MYSHOPIFY_DOMAIN si existe (recomendado para Admin API), sino fallback a PUBLIC_STORE_DOMAIN
       const storeDomain =
         context.env.SHOPIFY_MYSHOPIFY_DOMAIN || context.env.PUBLIC_STORE_DOMAIN;
+
+      if (!storeDomain) {
+        console.error(
+          'Error: No se encontró dominio de tienda (SHOPIFY_MYSHOPIFY_DOMAIN o PUBLIC_STORE_DOMAIN)',
+        );
+        return {
+          success: false,
+          error: 'Error de configuración: Falta dominio de tienda en .env',
+        };
+      }
 
       console.log('Procesando orden para:', {
         firstName,
@@ -143,7 +167,7 @@ export async function action({request, context}: ActionFunctionArgs) {
         );
         return {
           success: false,
-          error: `Error ${response.status}: ${response.statusText}. Verifique SHOPIFY_MYSHOPIFY_DOMAIN en .env`,
+          error: `Error ${response.status}: ${response.statusText}. Verifique SHOPIFY_ADMIN_API_TOKEN y SHOPIFY_MYSHOPIFY_DOMAIN en .env`,
         };
       }
 
@@ -532,8 +556,6 @@ export default function Product() {
   const doubleCompareAt: MoneyV2 | undefined = unitCompareAt
     ? scaleMoney(unitCompareAt, 2)
     : undefined;
-
-  console.log({unitPrice});
 
   const [stickyVisible, setStickyVisible] = useState(false);
   const [timeLeft, setTimeLeft] = useState(23 * 3600 + 47 * 60 + 2);
@@ -1105,8 +1127,8 @@ export default function Product() {
           <div className="micro">
             <div className="micro-item">
               <svg
-                width="16"
-                height="16"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 color="var(--blue)"
                 style={{marginBottom: '2px'}}
@@ -1117,8 +1139,8 @@ export default function Product() {
             </div>
             <div className="micro-item">
               <svg
-                width="16"
-                height="16"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 color="var(--blue)"
                 style={{marginBottom: '2px'}}
@@ -1129,8 +1151,8 @@ export default function Product() {
             </div>
             <div className="micro-item">
               <svg
-                width="16"
-                height="16"
+                width="22"
+                height="22"
                 viewBox="0 0 24 24"
                 color="var(--blue)"
                 style={{marginBottom: '2px'}}

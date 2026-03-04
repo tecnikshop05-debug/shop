@@ -136,22 +136,22 @@ function loadDeferredData({context}: Route.LoaderArgs) {
   const {storefront, customerAccount, cart} = context;
 
   // defer the footer query (below the fold)
-  const footer = storefront
-    .query(FOOTER_QUERY, {
-      cache: storefront.CacheLong(),
-      variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      },
-    })
-    .catch((error: Error) => {
-      // Log query errors, but don't throw them so the page can still render
-      console.error(error);
-      return null;
-    });
+  // const footer = storefront
+  //   .query(FOOTER_QUERY, {
+  //     cache: storefront.CacheLong(),
+  //     variables: {
+  //       footerMenuHandle: 'footer', // Adjust to your footer menu handle
+  //     },
+  //   })
+  //   .catch((error: Error) => {
+  //     // Log query errors, but don't throw them so the page can still render
+  //     console.error(error);
+  //     return null;
+  //   });
   return {
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
+    footer: Promise.resolve(null),
   };
 }
 
