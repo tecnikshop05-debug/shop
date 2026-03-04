@@ -1,4 +1,5 @@
 import {Analytics, getShopAnalytics, useNonce} from '@shopify/hydrogen';
+import {useEffect} from 'react';
 import {
   Outlet,
   useRouteError,
@@ -9,6 +10,7 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteLoaderData,
+  useLocation,
 } from 'react-router';
 import type {Route} from './+types/root';
 import favicon from '~/assets/favicon.svg';
@@ -159,6 +161,17 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
   const data = useRouteLoaderData<RootLoader>('root');
+  const location = useLocation();
+
+  useEffect(() => {
+    if (data?.facebookPixelId) {
+      // @ts-ignore
+      if (window.fbq) {
+        // @ts-ignore
+        window.fbq('track', 'PageView');
+      }
+    }
+  }, [location, data?.facebookPixelId]);
 
   return (
     <html lang="en">
