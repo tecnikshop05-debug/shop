@@ -1,8 +1,3 @@
-import {createHash} from 'crypto';
-
-/**
- * Tipos para los eventos de Facebook CAPI
- */
 export type FacebookUserData = {
   em?: string; // Email (hashed)
   ph?: string; // Phone (hashed)
@@ -31,7 +26,15 @@ export type FacebookCustomData = {
 export type FacebookEvent = {
   event_name: string;
   event_time: number;
-  action_source: 'website' | 'email' | 'app' | 'phone_call' | 'chat' | 'physical_store' | 'system_generated' | 'other';
+  action_source:
+    | 'website'
+    | 'email'
+    | 'app'
+    | 'phone_call'
+    | 'chat'
+    | 'physical_store'
+    | 'system_generated'
+    | 'other';
   user_data: FacebookUserData;
   custom_data?: FacebookCustomData;
   event_source_url?: string;
@@ -39,10 +42,19 @@ export type FacebookEvent = {
 
 /**
  * Función para hashear datos según requerimientos de Facebook (SHA256)
+ * Utiliza Web Crypto API para compatibilidad con Cloudflare Workers/Oxygen
  */
-export function hashData(data: string): string {
+export async function hashData(data: string): Promise<string> {
   if (!data) return '';
-  return createHash('sha256').update(data.trim().toLowerCase()).digest('hex');
+
+  const msgBuffer = new TextEncoder().encode(data.trim().toLowerCase());
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  return hashHex;
 }
 
 /**
@@ -52,7 +64,7 @@ export async function sendFacebookEvent(
   env: Env,
   event: Omit<FacebookEvent, 'event_time' | 'action_source'> & {
     action_source?: FacebookEvent['action_source'];
-  }
+  },
 ) {
   const pixelId = env.FACEBOOK_PIXEL_ID;
   const accessToken = env.FACEBOOK_ACCESS_TOKEN;
@@ -82,11 +94,11 @@ export async function sendFacebookEvent(
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
-      }
+      },
     );
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error('Facebook CAPI Error:', JSON.stringify(data, null, 2));
     } else {

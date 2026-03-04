@@ -210,17 +210,27 @@ export async function action({request, context}: ActionFunctionArgs) {
           }),
         );
 
+        const emailHashed = await hashData(
+          `${phone.replace(/\D/g, '')}@no-email.com`,
+        );
+        const phoneHashed = await hashData(phone);
+        const firstNameHashed = await hashData(firstName);
+        const lastNameHashed = await hashData(lastName);
+        const cityHashed = await hashData(city);
+        const provinceHashed = await hashData(province);
+        const countryHashed = await hashData('co');
+
         await sendFacebookEvent(context.env, {
           event_name: 'Purchase',
           event_source_url: request.url,
           user_data: {
-            em: hashData(`${phone.replace(/\D/g, '')}@no-email.com`), // Email generado
-            ph: hashData(phone),
-            fn: hashData(firstName),
-            ln: hashData(lastName),
-            ct: hashData(city),
-            st: hashData(province),
-            country: hashData('co'),
+            em: emailHashed,
+            ph: phoneHashed,
+            fn: firstNameHashed,
+            ln: lastNameHashed,
+            ct: cityHashed,
+            st: provinceHashed,
+            country: countryHashed,
             client_ip_address: clientIp,
             client_user_agent: userAgent,
             fbc: cookies._fbc,
@@ -287,7 +297,7 @@ export async function loader(args: LoaderFunctionArgs) {
   const {context, request} = args;
   const {product} = criticalData;
 
-  if (product) {
+  if (product && context.waitUntil) {
     context.waitUntil(
       (async () => {
         try {
