@@ -105,6 +105,17 @@ export function ProductForm({
         disabled={!selectedVariant || !selectedVariant.availableForSale}
         onClick={() => {
           open('cart');
+          // @ts-ignore
+          if (selectedVariant && typeof window !== 'undefined' && window.fbq) {
+            // @ts-ignore
+            window.fbq('track', 'AddToCart', {
+              content_ids: [selectedVariant.id],
+              content_name: selectedVariant.product.title,
+              content_type: 'product',
+              currency: selectedVariant.price.currencyCode,
+              value: selectedVariant.price.amount,
+            });
+          }
         }}
         lines={
           selectedVariant

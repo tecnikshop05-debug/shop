@@ -743,6 +743,7 @@ body {
   justify-content: center;
   position: relative;
   overflow: hidden;
+  touch-action: pan-y;
 }
 @media (min-width: 900px) {
   .gal-main {

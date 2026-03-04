@@ -14,10 +14,19 @@ export default async function handleRequest(
   reactRouterContext: EntryContext,
   context: HydrogenRouterContextProvider,
 ) {
+  console.log(
+    'DEBUG: context.env.PUBLIC_CHECKOUT_DOMAIN',
+    context.env.PUBLIC_CHECKOUT_DOMAIN,
+  );
+  console.log(
+    'DEBUG: context.env.PUBLIC_STORE_DOMAIN',
+    context.env.PUBLIC_STORE_DOMAIN,
+  );
+
   const {nonce, header, NonceProvider} = createContentSecurityPolicy({
     shop: {
-      checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
-      storeDomain: context.env.PUBLIC_STORE_DOMAIN,
+      checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN || '',
+      storeDomain: context.env.PUBLIC_STORE_DOMAIN || '',
     },
     // Extender la CSP predeterminada de Hydrogen con dominios permitidos
     defaultSrc: [
@@ -67,7 +76,7 @@ export default async function handleRequest(
     },
   );
 
-  if (isbot(request.headers.get('user-agent'))) {
+  if (isbot(request.headers.get('user-agent') || '')) {
     await body.allReady;
   }
 

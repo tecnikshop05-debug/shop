@@ -782,6 +782,32 @@ export default function Product() {
     );
   };
 
+  const touchStartRef = useRef<number | null>(null);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = e.targetTouches[0].clientX;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartRef.current === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const distance = touchStartRef.current - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      setActiveThumb((prev) =>
+        prev === product.images.nodes.length - 1 ? 0 : prev + 1,
+      );
+    }
+    if (isRightSwipe) {
+      setActiveThumb((prev) =>
+        prev === 0 ? product.images.nodes.length - 1 : prev - 1,
+      );
+    }
+    touchStartRef.current = null;
+  };
+
   const [inlineDepartment, setInlineDepartment] = useState('');
   const [inlineCity, setInlineCity] = useState('');
 
@@ -1029,7 +1055,11 @@ export default function Product() {
       <section className="hero" id="hero">
         {/* Gallery */}
         <div className="gal">
-          <div className="gal-main">
+          <div
+            className="gal-main"
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+          >
             {product.images.nodes.length > 1 && (
               <button className="gal-nav prev" onClick={handlePrev}>
                 <svg
