@@ -77,7 +77,7 @@ export function OrderModal({
           if (e.target === e.currentTarget) onClose();
         }}
         onKeyDown={(e) => {
-          if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+          if (e.key === 'Escape') {
             onClose();
           }
         }}
@@ -171,7 +171,7 @@ export function OrderModal({
         if (e.target === e.currentTarget) onClose();
       }}
       onKeyDown={(e) => {
-        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+        if (e.key === 'Escape') {
           onClose();
         }
       }}
