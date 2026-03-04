@@ -22,6 +22,20 @@ import {PhoneNumberInput} from '~/components/PhoneNumberInput';
 import {DEPARTMENTS, CITIES} from '~/lib/colombia-locations';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {sendFacebookEvent, hashData} from '~/lib/facebook';
+import type {ShouldRevalidateFunction} from 'react-router';
+
+export const shouldRevalidate: ShouldRevalidateFunction = ({
+  formData,
+  formMethod,
+}) => {
+  const actionType = formData?.get('action');
+
+  if (actionType === 'create_order') {
+    return false;
+  }
+
+  return true;
+};
 
 // ════════════════════════════════════════════════════════════════════════════
 // ACTION (Create Order)
@@ -124,6 +138,11 @@ export async function action({request, context}: ActionFunctionArgs) {
 
       const orderPayload = {
         order: {
+          customer: {
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone,
+          },
           line_items: [lineItem],
           shipping_address: {
             first_name: firstName,
