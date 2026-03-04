@@ -5,7 +5,7 @@ import {
   Outlet,
   useLoaderData,
 } from 'react-router';
-import type {Route} from './+types/account';
+import type {Route} from './+types/($locale).account';
 import {CUSTOMER_DETAILS_QUERY} from '~/graphql/customer-account/CustomerDetailsQuery';
 
 export function shouldRevalidate() {

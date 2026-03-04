@@ -1,4 +1,4 @@
-import type {Route} from './+types/collections.all';
+import type {Route} from './+types/($locale).collections.all';
 import {useLoaderData} from 'react-router';
 import {getPaginationVariables, Image, Money} from '@shopify/hydrogen';
 import {PaginatedResourceSection} from '~/components/PaginatedResourceSection';
@@ -86,6 +86,14 @@ const COLLECTION_ITEM_FRAGMENT = `#graphql
       height
     }
     priceRange {
+      minVariantPrice {
+        ...MoneyCollectionItem
+      }
+      maxVariantPrice {
+        ...MoneyCollectionItem
+      }
+    }
+    compareAtPriceRange {
       minVariantPrice {
         ...MoneyCollectionItem
       }

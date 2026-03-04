@@ -1,4 +1,4 @@
-import type {Route} from './+types/[sitemap.xml]';
+import type {Route} from './+types/($locale).[sitemap.xml]';
 import {getSitemapIndex} from '@shopify/hydrogen';
 
 export async function loader({

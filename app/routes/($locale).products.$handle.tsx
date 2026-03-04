@@ -14,6 +14,7 @@ import {
   Money,
   Image,
 } from '@shopify/hydrogen';
+import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
 import {ProductPrice} from '~/components/ProductPrice';
 import {OrderModal} from '~/components/OrderModal';
 import {FacebookReviews} from '~/components/FacebookReviews';
@@ -510,7 +511,29 @@ export default function Product() {
     product.selectedOrFirstAvailableVariant,
     getAdjacentAndFirstAvailableVariants(product),
   );
-  useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
+  const selectedOptionsForUrl = selectedVariant.selectedOptions.filter(
+    (option) => !(option.name === 'Title' && option.value === 'Default Title'),
+  );
+  useSelectedOptionInUrlParam(selectedOptionsForUrl);
+
+  const scaleMoney = (money: MoneyV2, factor: number): MoneyV2 => {
+    return {
+      amount: String((parseFloat(money.amount) * factor).toFixed(2)),
+      currencyCode: money.currencyCode,
+    };
+  };
+
+  const unitPrice = selectedVariant?.price;
+  const unitCompareAt = selectedVariant?.compareAtPrice ?? undefined;
+
+  const doublePrice: MoneyV2 | undefined = unitPrice
+    ? scaleMoney(unitPrice, 1.9)
+    : undefined;
+  const doubleCompareAt: MoneyV2 | undefined = unitCompareAt
+    ? scaleMoney(unitCompareAt, 2)
+    : undefined;
+
+  console.log({unitPrice});
 
   const [stickyVisible, setStickyVisible] = useState(false);
   const [timeLeft, setTimeLeft] = useState(23 * 3600 + 47 * 60 + 2);
@@ -519,8 +542,47 @@ export default function Product() {
   const [selectedKit, setSelectedKit] = useState(2);
   const [openAcc, setOpenAcc] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const thumbsRef = useRef<HTMLDivElement>(null);
+  const kitPrice = selectedKit === 2 ? doublePrice : unitPrice;
+  const kitCompareAt = selectedKit === 2 ? doubleCompareAt : unitCompareAt;
+  const kitSavings: MoneyV2 | undefined =
+    kitPrice && kitCompareAt
+      ? {
+          amount: String(
+            Math.max(
+              0,
+              parseFloat(kitCompareAt.amount) - parseFloat(kitPrice.amount),
+            ).toFixed(2),
+          ),
+          currencyCode: kitCompareAt.currencyCode,
+        }
+      : undefined;
+  const kitPercentOff =
+    kitPrice && kitCompareAt
+      ? Math.max(
+          0,
+          Math.round(
+            (1 -
+              parseFloat(kitPrice.amount) / parseFloat(kitCompareAt.amount)) *
+              100,
+          ),
+        )
+      : null;
 
-  // Inline form state
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveThumb((prev) =>
+      prev === 0 ? product.images.nodes.length - 1 : prev - 1,
+    );
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveThumb((prev) =>
+      prev === product.images.nodes.length - 1 ? 0 : prev + 1,
+    );
+  };
+
   const [inlineDepartment, setInlineDepartment] = useState('');
   const [inlineCity, setInlineCity] = useState('');
 
@@ -562,6 +624,23 @@ export default function Product() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Keyboard Navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        setActiveThumb((prev) =>
+          prev === 0 ? product.images.nodes.length - 1 : prev - 1,
+        );
+      } else if (e.key === 'ArrowRight') {
+        setActiveThumb((prev) =>
+          prev === product.images.nodes.length - 1 ? 0 : prev + 1,
+        );
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [product.images.nodes.length]);
+
   // Countdown
   useEffect(() => {
     const timer = setInterval(() => {
@@ -600,10 +679,13 @@ export default function Product() {
       formData.append('variantId', product.selectedOrFirstAvailableVariant.id);
     }
     formData.append('selectedKit', selectedKit.toString());
-    formData.append('price', selectedKit === 2 ? '$179.900' : '$99.900');
+    formData.append(
+      'price',
+      (selectedKit === 2 ? doublePrice : unitPrice)?.amount ?? '',
+    );
     formData.append('action', 'create_order');
 
-    submit(formData, {method: 'post'});
+    void submit(formData, {method: 'post'});
   };
 
   const scrollToForm = () => {
@@ -622,9 +704,9 @@ export default function Product() {
       {/* ════ ANNOUNCEMENT BAR ════ */}
       <div className="ann">
         <div className="ann-inner">
-          🔥 Solo quedan <strong>9 unidades</strong> — Envío gratis a toda
-          Colombia
-          <span className="ann-cd">{formatTime(timeLeft)}</span>
+          🕐 Precio especial disponible por
+          <span className="ann-cd">{formatTime(timeLeft)}</span> — Envío gratis
+          a toda Colombia 🇨🇴
         </div>
       </div>
 
@@ -636,10 +718,11 @@ export default function Product() {
           style={{display: 'flex', alignItems: 'center'}}
         >
           <img
-            src="/images/LOGO%20FINAL...png"
+            src="/images/LOGOFINAL1.png"
             alt="TECNIK"
             style={{height: '32px', width: 'auto'}}
           />
+          <p>Tecnik</p>
         </a>
         <div className="nav-r">
           <a className="nav-link" href="#reviews">
@@ -670,6 +753,22 @@ export default function Product() {
         {/* Gallery */}
         <div className="gal">
           <div className="gal-main">
+            {product.images.nodes.length > 1 && (
+              <button className="gal-nav prev" onClick={handlePrev}>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+              </button>
+            )}
             {product.images.nodes.length > 0 && (
               <ProductImage
                 image={
@@ -679,17 +778,37 @@ export default function Product() {
                 id="main-img"
               />
             )}
+            {product.images.nodes.length > 1 && (
+              <button className="gal-nav next" onClick={handleNext}>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </button>
+            )}
           </div>
-          <div className="gal-thumbs">
-            {product.images.nodes.map((img: any, idx: number) => (
-              <div
-                key={img.id || idx}
-                className={`thumb ${idx === activeThumb ? 'on' : ''}`}
-                onClick={() => setActiveThumb(idx)}
-              >
-                <ProductImage image={img} />
-              </div>
-            ))}
+          <div className="gal-thumbs-wrap">
+            <div className="gal-thumbs" ref={thumbsRef}>
+              {product.images.nodes.map((img: any, idx: number) => (
+                <button
+                  type="button"
+                  key={img.id || idx}
+                  className={`thumb ${idx === activeThumb ? 'on' : ''}`}
+                  onClick={() => setActiveThumb(idx)}
+                  aria-label={`Ver imagen ${idx + 1}`}
+                >
+                  <ProductImage image={img} />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -756,7 +875,17 @@ export default function Product() {
                 color: '#0F172A',
               }}
             >
-              {selectedKit === 2 ? '$179.900' : '$99.900'}
+              {kitPrice ? (
+                <>
+                  $
+                  <Money
+                    as="span"
+                    data={kitPrice}
+                    withoutCurrency
+                    withoutTrailingZeros
+                  />
+                </>
+              ) : null}
             </span>
             <div style={{display: 'flex', flexDirection: 'column', gap: '4px'}}>
               <span
@@ -769,7 +898,17 @@ export default function Product() {
                   lineHeight: 1,
                 }}
               >
-                {selectedKit === 2 ? '$250.000' : '$125.000'}
+                {kitCompareAt ? (
+                  <>
+                    $
+                    <Money
+                      as="span"
+                      data={kitCompareAt}
+                      withoutCurrency
+                      withoutTrailingZeros
+                    />
+                  </>
+                ) : null}
               </span>
               <div
                 style={{
@@ -800,7 +939,17 @@ export default function Product() {
                     color: '#166534',
                   }}
                 >
-                  {selectedKit === 2 ? '$70.100' : '$25.100'}
+                  {kitSavings ? (
+                    <>
+                      $
+                      <Money
+                        as="span"
+                        data={kitSavings}
+                        withoutCurrency
+                        withoutTrailingZeros
+                      />
+                    </>
+                  ) : null}
                 </span>
               </div>
             </div>
@@ -860,16 +1009,30 @@ export default function Product() {
           <div className="selector-wrap">
             <div className="selector-title">SELECCIONA TU OFERTA:</div>
             <div className="selector-grid">
-              <div
+              <button
+                type="button"
                 className={`selector-card ${selectedKit === 1 ? 'active' : ''}`}
                 onClick={() => setSelectedKit(1)}
               >
                 <div className="selector-content">
                   <div className="selector-hd">1 UNIDAD</div>
-                  <div className="selector-pr">$99.900</div>
+                  <div className="selector-pr">
+                    {unitPrice ? (
+                      <>
+                        $
+                        <Money
+                          as="span"
+                          data={unitPrice}
+                          withoutCurrency
+                          withoutTrailingZeros
+                        />
+                      </>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-              <div
+              </button>
+              <button
+                type="button"
                 className={`selector-card best-seller ${
                   selectedKit === 2 ? 'active' : ''
                 }`}
@@ -878,10 +1041,22 @@ export default function Product() {
                 <div className="selector-badge">MÁS VENDIDO</div>
                 <div className="selector-content">
                   <div className="selector-hd">2 UNIDADES</div>
-                  <div className="selector-pr">$179.900</div>
+                  <div className="selector-pr">
+                    {doublePrice ? (
+                      <>
+                        $
+                        <Money
+                          as="span"
+                          data={doublePrice}
+                          withoutCurrency
+                          withoutTrailingZeros
+                        />
+                      </>
+                    ) : null}
+                  </div>
                   <div className="selector-sv">Ahorra extra 10%</div>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -902,7 +1077,17 @@ export default function Product() {
             <span style={{fontSize: '17px'}}>
               PEDIR AHORA —{' '}
               <span id="cta-price">
-                {selectedKit === 2 ? '$179.900' : '$99.900'}
+                {kitPrice ? (
+                  <>
+                    $
+                    <Money
+                      as="span"
+                      data={kitPrice}
+                      withoutCurrency
+                      withoutTrailingZeros
+                    />
+                  </>
+                ) : null}
               </span>
             </span>
             <span
@@ -1241,7 +1426,11 @@ export default function Product() {
 
           <div className="transform-block">
             <div className="transform-img">
-              <img src="/images/transform-1.webp" loading="lazy" />
+              <img
+                src="/images/transform-1.webp"
+                loading="lazy"
+                alt="Antes: baño desordenado"
+              />
             </div>
             <div>
               <div className="eyebrow">Organización</div>
@@ -1310,7 +1499,11 @@ export default function Product() {
 
           <div className="transform-block rev">
             <div className="transform-img">
-              <img src="/images/transform-2.webp" loading="lazy" />
+              <img
+                src="/images/transform-2.webp"
+                loading="lazy"
+                alt="Después: baño organizado"
+              />
             </div>
             <div>
               <div className="eyebrow">Familia</div>
@@ -1457,6 +1650,7 @@ export default function Product() {
                 src="/images/tech-visual.webp"
                 className="w-full h-full object-cover"
                 loading="lazy"
+                alt="Vista del producto en uso"
               />
               <div className="tech-uv-ring"></div>
             </div>
@@ -1533,14 +1727,16 @@ export default function Product() {
           <div className="price-cta-card">
             <div className="flex items-baseline gap-14 mb-10">
               <span className="big-price">
-                <ProductPrice price={selectedVariant?.price} />
+                <ProductPrice price={kitPrice} />
               </span>
-              {selectedVariant?.compareAtPrice && (
+              {kitCompareAt && (
                 <span className="price-cta-compare-price">
-                  <Money data={selectedVariant.compareAtPrice} />
+                  <Money data={kitCompareAt} withoutTrailingZeros />
                 </span>
               )}
-              <span className="badge b-confirm">−20%</span>
+              {kitPercentOff != null ? (
+                <span className="badge b-confirm">−{kitPercentOff}%</span>
+              ) : null}
             </div>
             <ul className="price-cta-list">
               <li>
@@ -1590,7 +1786,7 @@ export default function Product() {
             </ul>
             <button className="btn btn-p btn-xl cta-btn" onClick={scrollToForm}>
               <span className="text-17">
-                PEDIR AHORA — <ProductPrice price={selectedVariant?.price} />
+                PEDIR AHORA — <ProductPrice price={kitPrice} />
               </span>
               <span className="btn-sub-text">
                 Envío Gratis + Pago al Recibir
@@ -1737,7 +1933,17 @@ export default function Product() {
                 <div className="flex-1">
                   <div className="order-product-title">{product.title}</div>
                   <div className="order-product-price">
-                    {selectedKit === 2 ? '$179.900' : '$99.900'}
+                    {kitPrice ? (
+                      <>
+                        $
+                        <Money
+                          as="span"
+                          data={kitPrice}
+                          withoutCurrency
+                          withoutTrailingZeros
+                        />
+                      </>
+                    ) : null}
                   </div>
                 </div>
                 {selectedKit === 2 && (
@@ -1751,11 +1957,12 @@ export default function Product() {
 
               {/* Selector de oferta inline */}
               <div className="mb-4">
-                <label className="order-label mb-2 block">
+                <div className="order-label mb-2 block">
                   Selecciona tu oferta:
-                </label>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div
+                  <button
+                    type="button"
                     className={`border rounded-lg p-3 cursor-pointer transition-all ${
                       selectedKit === 1
                         ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
@@ -1766,9 +1973,13 @@ export default function Product() {
                     <div className="text-sm font-bold text-gray-900">
                       1 UNIDAD
                     </div>
-                    <div className="text-sm text-gray-600">$99.900</div>
-                  </div>
-                  <div
+                    {/* <div className="text-sm text-gray-600">$99.900</div> */}
+                    <div className="text-sm text-gray-600">
+                      <ProductPrice price={unitPrice} />
+                    </div>
+                  </button>
+                  <button
+                    type="button"
                     className={`border rounded-lg p-3 cursor-pointer transition-all relative ${
                       selectedKit === 2
                         ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
@@ -1776,17 +1987,17 @@ export default function Product() {
                     }`}
                     onClick={() => setSelectedKit(2)}
                   >
-                    <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                      MÁS VENDIDO
-                    </div>
+                    <div className="selector-badge">MÁS VENDIDO</div>
                     <div className="text-sm font-bold text-gray-900">
                       2 UNIDADES
                     </div>
-                    <div className="text-sm text-gray-600">$179.900</div>
+                    <div className="text-sm text-gray-600">
+                      <ProductPrice price={doublePrice} />
+                    </div>
                     <div className="text-[10px] text-green-600 font-bold mt-1">
                       Ahorra extra
                     </div>
-                  </div>
+                  </button>
                 </div>
               </div>
 
@@ -1962,14 +2173,14 @@ export default function Product() {
             <div className="footer-h">Enlaces</div>
             <div className="footer-links">
               {/* <a href="#">Rastrea tu pedido</a> */}
-              <a href="#">Política de Garantía</a>
-              <a href="#">Términos y Condiciones</a>
+              <a href="/policies/refund-policy">Política de Garantía</a>
+              <a href="/policies/terms-of-service">Términos y Condiciones</a>
             </div>
           </div>
           <div>
             <div className="footer-h">Contacto</div>
             <div className="footer-links">
-              <a href="#">tecnikshop05@gmail.com</a>
+              <a href="mailto:tecnikshop05@gmail.com">tecnikshop05@gmail.com</a>
             </div>
           </div>
         </div>
@@ -1989,7 +2200,7 @@ export default function Product() {
           <div>
             <div className="sticky-nm">{product.title}</div>
             <div className="sticky-pr">
-              <ProductPrice price={selectedVariant?.price} />
+              <ProductPrice price={kitPrice} />
             </div>
           </div>
         </div>
@@ -2007,8 +2218,7 @@ export default function Product() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(formData) => {
-          console.log('Submitting form data from modal...');
-          submit(formData, {method: 'post'});
+          void submit(formData, {method: 'post'});
         }}
         productTitle={product.title}
         productImage={
@@ -2017,7 +2227,8 @@ export default function Product() {
         }
         variantId={product.selectedOrFirstAvailableVariant?.id}
         selectedKit={selectedKit}
-        price={selectedKit === 2 ? '$179.900' : '$99.900'}
+        unitPrice={unitPrice}
+        doublePrice={doublePrice}
         isSubmitting={isSubmitting}
         actionData={actionData}
       />
@@ -2168,5 +2379,15 @@ function LazyVideo(props: React.VideoHTMLAttributes<HTMLVideoElement>) {
         : `${props.src}#t=0.001`
       : undefined;
 
-  return <video ref={videoRef} {...props} src={videoSrc} preload="metadata" />;
+  return (
+    <video ref={videoRef} {...props} src={videoSrc} preload="metadata">
+      <track
+        default
+        kind="captions"
+        srcLang="es"
+        label="Español"
+        src="data:text/vtt,WEBVTT"
+      />
+    </video>
+  );
 }

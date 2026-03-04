@@ -1,4 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
+import {Money} from '@shopify/hydrogen';
+import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
 import {DEPARTMENTS, CITIES} from '~/lib/colombia-locations';
 import {PhoneNumberInput} from './PhoneNumberInput';
 
@@ -10,7 +12,8 @@ type OrderModalProps = {
   productImage?: string;
   variantId?: string;
   selectedKit: number;
-  price: string;
+  unitPrice?: MoneyV2;
+  doublePrice?: MoneyV2;
   isSubmitting: boolean;
   actionData?: any;
 };
@@ -23,7 +26,8 @@ export function OrderModal({
   productImage,
   variantId,
   selectedKit,
-  price,
+  unitPrice,
+  doublePrice,
   isSubmitting,
   actionData,
 }: OrderModalProps) {
@@ -63,6 +67,14 @@ export function OrderModal({
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
         }}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+            onClose();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Cerrar"
       >
         <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden p-8 text-center animate-fade-in">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -98,7 +110,7 @@ export function OrderModal({
     );
   }
 
-  const currentPrice = localKit === 2 ? '$179.900' : '$99.900';
+  const currentPrice = localKit === 2 ? doublePrice : unitPrice;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -110,7 +122,7 @@ export function OrderModal({
       formData.append('variantId', variantId);
     }
     formData.append('selectedKit', localKit.toString());
-    formData.append('price', currentPrice);
+    formData.append('price', currentPrice?.amount ?? '');
     formData.append('action', 'create_order');
 
     // Append prefix to phone if not present (handled visually, but ensure data integrity)
@@ -118,7 +130,6 @@ export function OrderModal({
     // However, the phone input below will just be the number, we'll prepend +57 in the UI or let the user type.
     // Actually, better to just let the user type the number and prepend +57 in the action (already done in action).
 
-    console.log('OrderModal: Calling onSubmit with formData');
     onSubmit(formData);
   };
 
@@ -128,6 +139,14 @@ export function OrderModal({
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') {
+          onClose();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label="Cerrar"
     >
       <div
         ref={modalRef}
@@ -179,7 +198,20 @@ export function OrderModal({
                 <span className="font-bold">
                   {localKit === 1 ? '1 Unidad' : '2 Unidades'}
                 </span>{' '}
-                — <span className="font-bold text-lg">{currentPrice}</span>
+                —{' '}
+                <span className="font-bold text-lg">
+                  {currentPrice ? (
+                    <>
+                      $
+                      <Money
+                        as="span"
+                        data={currentPrice}
+                        withoutCurrency
+                        withoutTrailingZeros
+                      />
+                    </>
+                  ) : null}
+                </span>
               </p>
               <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
                 <svg
@@ -199,11 +231,12 @@ export function OrderModal({
 
           {/* Selector de oferta en el modal */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="block text-sm font-medium text-gray-700 mb-2">
               Selecciona tu oferta:
-            </label>
+            </div>
             <div className="grid grid-cols-2 gap-3">
-              <div
+              <button
+                type="button"
                 className={`border rounded-lg p-3 cursor-pointer transition-all ${
                   localKit === 1
                     ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
@@ -212,9 +245,22 @@ export function OrderModal({
                 onClick={() => setLocalKit(1)}
               >
                 <div className="text-sm font-bold text-gray-900">1 UNIDAD</div>
-                <div className="text-sm text-gray-600">$99.900</div>
-              </div>
-              <div
+                <div className="text-sm text-gray-600">
+                  {unitPrice ? (
+                    <>
+                      $
+                      <Money
+                        as="span"
+                        data={unitPrice}
+                        withoutCurrency
+                        withoutTrailingZeros
+                      />
+                    </>
+                  ) : null}
+                </div>
+              </button>
+              <button
+                type="button"
                 className={`border rounded-lg p-3 cursor-pointer transition-all relative ${
                   localKit === 2
                     ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500'
@@ -222,17 +268,27 @@ export function OrderModal({
                 }`}
                 onClick={() => setLocalKit(2)}
               >
-                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                  MÁS VENDIDO
-                </div>
+                <div className="selector-badge">MÁS VENDIDO</div>
                 <div className="text-sm font-bold text-gray-900">
                   2 UNIDADES
                 </div>
-                <div className="text-sm text-gray-600">$179.900</div>
+                <div className="text-sm text-gray-600">
+                  {doublePrice ? (
+                    <>
+                      $
+                      <Money
+                        as="span"
+                        data={doublePrice}
+                        withoutCurrency
+                        withoutTrailingZeros
+                      />
+                    </>
+                  ) : null}
+                </div>
                 <div className="text-[10px] text-green-600 font-bold mt-1">
                   Ahorra extra
                 </div>
-              </div>
+              </button>
             </div>
           </div>
 

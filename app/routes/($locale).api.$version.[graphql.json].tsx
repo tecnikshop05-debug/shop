@@ -1,4 +1,4 @@
-import type {Route} from './+types/api.$version.[graphql.json]';
+import type {Route} from './+types/($locale).api.$version.[graphql.json]';
 
 export async function action({params, context, request}: Route.ActionArgs) {
   const response = await fetch(

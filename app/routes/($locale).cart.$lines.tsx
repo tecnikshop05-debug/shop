@@ -1,5 +1,5 @@
 import {redirect} from 'react-router';
-import type {Route} from './+types/cart.$lines';
+import type {Route} from './+types/($locale).cart.$lines';
 
 /**
  * Automatically creates a new cart based on the URL and redirects straight to checkout.

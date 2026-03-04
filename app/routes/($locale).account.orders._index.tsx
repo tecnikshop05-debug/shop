@@ -4,7 +4,7 @@ import {
   useNavigation,
   useSearchParams,
 } from 'react-router';
-import type {Route} from './+types/account.orders._index';
+import type {Route} from './+types/($locale).account.orders._index';
 import {useRef} from 'react';
 import {
   Money,

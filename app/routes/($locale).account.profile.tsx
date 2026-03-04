@@ -8,7 +8,7 @@ import {
   useNavigation,
   useOutletContext,
 } from 'react-router';
-import type {Route} from './+types/account.profile';
+import type {Route} from './+types/($locale).account.profile';
 
 export type ActionResponse = {
   error: string | null;

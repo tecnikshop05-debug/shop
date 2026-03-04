@@ -1,5 +1,5 @@
 import {redirect, useLoaderData} from 'react-router';
-import type {Route} from './+types/account.orders.$id';
+import type {Route} from './+types/($locale).account.orders.$id';
 import {Money, Image} from '@shopify/hydrogen';
 import type {
   OrderLineItemFullFragment,

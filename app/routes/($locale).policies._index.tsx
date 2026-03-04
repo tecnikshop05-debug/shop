@@ -1,5 +1,5 @@
 import {useLoaderData, Link} from 'react-router';
-import type {Route} from './+types/policies._index';
+import type {Route} from './+types/($locale).policies._index';
 import type {PoliciesQuery, PolicyItemFragment} from 'storefrontapi.generated';
 
 export async function loader({context}: Route.LoaderArgs) {

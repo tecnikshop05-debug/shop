@@ -19,26 +19,42 @@ export function ProductItem({
 }) {
   const variantUrl = useVariantUrl(product.handle);
   const image = product.featuredImage;
+  const compareAtPrice = (product as any)?.compareAtPriceRange?.minVariantPrice;
+  const price = product.priceRange.minVariantPrice;
+
   return (
     <Link
-      className="product-item"
+      className="product-card group"
       key={product.id}
       prefetch="intent"
       to={variantUrl}
     >
-      {image && (
-        <Image
-          alt={image.altText || product.title}
-          aspectRatio="1/1"
-          data={image}
-          loading={loading}
-          sizes="(min-width: 45em) 400px, 100vw"
-        />
-      )}
-      <h4>{product.title}</h4>
-      <small>
-        <Money data={product.priceRange.minVariantPrice} />
-      </small>
+      <div className="product-image-wrap">
+        {image && (
+          <Image
+            alt={image.altText || product.title}
+            aspectRatio="1/1"
+            data={image}
+            loading={loading}
+            sizes="(min-width: 45em) 400px, 100vw"
+          />
+        )}
+        {compareAtPrice && <div className="product-badge">Oferta</div>}
+      </div>
+
+      <div className="product-info">
+        <h4 className="product-title">{product.title}</h4>
+        <div className="product-price-row">
+          <span className="product-price">
+            <Money data={price} />
+          </span>
+          {compareAtPrice && (
+            <span className="product-compare-price">
+              <Money data={compareAtPrice} />
+            </span>
+          )}
+        </div>
+      </div>
     </Link>
   );
 }

@@ -1,5 +1,5 @@
 import {redirect} from 'react-router';
-import type {Route} from './+types/discount.$code';
+import type {Route} from './+types/($locale).discount.$code';
 
 /**
  * Automatically applies a discount found on the url
