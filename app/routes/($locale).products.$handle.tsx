@@ -43,6 +43,14 @@ export async function action({request, context}: ActionFunctionArgs) {
     const selectedKit = formData.get('selectedKit') as string;
     const priceStr = formData.get('price') as string;
 
+    // Capture UTM parameters from form
+    const utmSource = formData.get('utm_source') as string;
+    const utmMedium = formData.get('utm_medium') as string;
+    const utmCampaign = formData.get('utm_campaign') as string;
+    const utmContent = formData.get('utm_content') as string;
+    const utmTerm = formData.get('utm_term') as string;
+    const utmId = formData.get('utm_id') as string;
+
     // Limpiar precio para obtener valor numérico (aprox)
     // Validar que los campos existan antes de procesarlos
     if (!priceStr || !phoneRaw) {
@@ -120,16 +128,26 @@ export async function action({request, context}: ActionFunctionArgs) {
           shipping_address: {
             first_name: firstName,
             last_name: lastName,
-            address1,
-            city,
-            province,
+            address1: address1 || 'Dirección no especificada', // Fallback to avoid empty string
+            city: city || 'Bogotá', // Fallback
+            province: province || 'Cundinamarca', // Fallback
             country_code: 'CO',
-            phone,
+            phone: phone,
           },
-          email: `${phone.replace(/\D/g, '')}@no-email.com`,
-          phone,
+          billing_address: {
+            // Duplicar shipping_address en billing_address
+            first_name: firstName,
+            last_name: lastName,
+            address1: address1 || 'Dirección no especificada',
+            city: city || 'Bogotá',
+            province: province || 'Cundinamarca',
+            country_code: 'CO',
+            phone: phone,
+          },
+          phone: phone,
           financial_status: 'pending',
           tags: 'Contraentrega, LandingPage',
+          payment_gateway_names: ['manual'],
           shipping_lines: [
             {
               title: 'Envío Gratis',
@@ -255,6 +273,7 @@ export async function action({request, context}: ActionFunctionArgs) {
         success: true,
         orderId: json.order?.id,
         orderName: json.order?.name,
+        orderStatusUrl: json.order?.order_status_url,
       };
     } catch (error) {
       console.error('Error creando orden:', error);
@@ -290,6 +309,17 @@ export const meta = ({data}: {data: any}) => {
 export async function loader(args: LoaderFunctionArgs) {
   const deferredData = loadDeferredData(args);
   const criticalData = await loadCriticalData(args);
+
+  // Capture UTM parameters from URL
+  const url = new URL(args.request.url);
+  const utms = {
+    source: url.searchParams.get('utm_source') || '',
+    medium: url.searchParams.get('utm_medium') || '',
+    campaign: url.searchParams.get('utm_campaign') || '',
+    content: url.searchParams.get('utm_content') || '',
+    term: url.searchParams.get('utm_term') || '',
+    id: url.searchParams.get('utm_id') || '',
+  };
 
   // --------------------------------------------------------------------------
   // Facebook CAPI: ViewContent
@@ -348,7 +378,7 @@ export async function loader(args: LoaderFunctionArgs) {
     );
   }
 
-  return {...deferredData, ...criticalData, eventId};
+  return {...deferredData, ...criticalData, eventId, utms};
 }
 
 async function loadCriticalData({
@@ -637,13 +667,15 @@ function SvgSprite() {
 // ════════════════════════════════════════════════════════════════════════════
 
 export default function Product() {
-  const {product, eventId} = useLoaderData<typeof loader>();
+  const {product, eventId, utms} = useLoaderData<typeof loader>();
   const submit = useSubmit();
   const navigation = useNavigation();
   const actionData = useActionData<typeof action>() as
     | {
         success: boolean;
         orderId?: string;
+        orderName?: string;
+        orderStatusUrl?: string;
         errors?: any[];
         error?: string;
         simulated?: boolean;
@@ -762,6 +794,43 @@ export default function Product() {
       // El modal se encargará de mostrar el mensaje de éxito
       // setIsModalOpen(false);
       console.log('Pedido creado con éxito', actionData);
+
+      // Track Purchase event client-side for redundancy
+      // @ts-ignore
+      if (window.fbq && product) {
+        const variant = product.selectedOrFirstAvailableVariant;
+        const price = variant?.price?.amount || '0';
+        const currency = variant?.price?.currencyCode || 'COP';
+
+        // @ts-ignore
+        window.fbq(
+          'track',
+          'Purchase',
+          {
+            content_name: product.title,
+            content_ids: variant
+              ? [variant.id.split('/').pop()!]
+              : [product.id.split('/').pop()!],
+            content_type: 'product',
+            value: parseFloat(price),
+            currency: currency,
+            order_id: actionData.orderId,
+            num_items: selectedKit, // Assuming 1 kit = 1 item in logic, but actually 2 units if kit 2
+          },
+          {eventID: actionData.orderId}, // Use orderId as eventID for deduplication with server-side Purchase
+        );
+      }
+
+      // Redireccionar a la página de estado del pedido si existe
+      if (actionData.orderStatusUrl) {
+        window.location.href = actionData.orderStatusUrl;
+      } else {
+        // Fallback si no hay URL (aunque debería haber)
+        setIsModalOpen(false);
+        alert(
+          `¡Gracias por tu compra! Tu pedido ${actionData.orderName} ha sido recibido.`,
+        );
+      }
     } else if (actionData?.errors) {
       alert(
         'Error al crear el pedido: ' +
@@ -776,7 +845,28 @@ export default function Product() {
     setOpenAcc(openAcc === id ? null : id);
   };
 
-  const openModal = () => setIsModalOpen(true);
+  const openModal = () => {
+    setIsModalOpen(true);
+    // Track InitiateCheckout when modal opens
+    // @ts-ignore
+    if (window.fbq && product) {
+      const variant = product.selectedOrFirstAvailableVariant;
+      const price = variant?.price?.amount || '0';
+      const currency = variant?.price?.currencyCode || 'COP';
+
+      // @ts-ignore
+      window.fbq('track', 'InitiateCheckout', {
+        content_name: product.title,
+        content_ids: variant
+          ? [variant.id.split('/').pop()!]
+          : [product.id.split('/').pop()!],
+        content_type: 'product',
+        value: parseFloat(price),
+        currency: currency,
+        num_items: selectedKit,
+      });
+    }
+  };
 
   // Scroll Listener
   useEffect(() => {
@@ -830,6 +920,26 @@ export default function Product() {
   const handleInlineSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    // Track AddPaymentInfo (User is submitting the form with their info)
+    // @ts-ignore
+    if (window.fbq && product) {
+      const variant = product.selectedOrFirstAvailableVariant;
+      const price = variant?.price?.amount || '0';
+      const currency = variant?.price?.currencyCode || 'COP';
+
+      // @ts-ignore
+      window.fbq('track', 'AddPaymentInfo', {
+        content_name: product.title,
+        content_ids: variant
+          ? [variant.id.split('/').pop()!]
+          : [product.id.split('/').pop()!],
+        content_type: 'product',
+        value: parseFloat(price),
+        currency: currency,
+        payment_type: 'Contraentrega',
+      });
+    }
 
     const formData = new FormData(e.currentTarget);
 
@@ -2182,21 +2292,21 @@ export default function Product() {
                     name="fullName"
                     required
                     className="order-input"
-                    placeholder="Tu nombre y apellido"
+                    placeholder="tu@email.com"
                   />
                 </div>
 
                 <div className="field-group">
-                  <PhoneNumberInput />
+                  <PhoneNumberInput required />
                 </div>
 
                 <div className="field-group">
-                  <label htmlFor="province" className="order-label">
+                  <label htmlFor="department" className="order-label">
                     Departamento
                   </label>
                   <div className="relative">
                     <select
-                      id="province"
+                      id="department"
                       name="province"
                       required
                       value={inlineDepartment}
@@ -2205,27 +2315,21 @@ export default function Product() {
                         setInlineCity('');
                       }}
                       className="order-input appearance-none bg-white"
-                      style={{backgroundImage: 'none'}}
                     >
-                      <option value="">Seleccionar</option>
-                      {DEPARTMENTS.map((dept) => (
-                        <option key={dept} value={dept}>
-                          {dept}
+                      <option value="">Seleccionar...</option>
+                      {DEPARTMENTS.map((dep) => (
+                        <option key={dep} value={dep}>
+                          {dep}
                         </option>
                       ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                       <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        className="fill-current h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
                       >
-                        <path d="M6 9l6 6 6-6" />
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                       </svg>
                     </div>
                   </div>
@@ -2233,7 +2337,7 @@ export default function Product() {
 
                 <div className="field-group">
                   <label htmlFor="city" className="order-label">
-                    Ciudad
+                    Ciudad / Municipio
                   </label>
                   <div className="relative">
                     <select
@@ -2244,11 +2348,8 @@ export default function Product() {
                       onChange={(e) => setInlineCity(e.target.value)}
                       disabled={!inlineDepartment}
                       className="order-input appearance-none bg-white disabled:bg-gray-100 disabled:text-gray-400"
-                      style={{backgroundImage: 'none'}}
                     >
-                      <option value="">
-                        {inlineDepartment ? 'Seleccionar' : 'Elija Depto'}
-                      </option>
+                      <option value="">Seleccionar...</option>
                       {inlineDepartment &&
                         CITIES[inlineDepartment]?.map((c) => (
                           <option key={c} value={c}>
@@ -2256,18 +2357,13 @@ export default function Product() {
                           </option>
                         ))}
                     </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-gray-500">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                       <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                        className="fill-current h-4 w-4"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
                       >
-                        <path d="M6 9l6 6 6-6" />
+                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                       </svg>
                     </div>
                   </div>
@@ -2275,7 +2371,7 @@ export default function Product() {
 
                 <div className="field-group">
                   <label htmlFor="address1" className="order-label">
-                    Dirección completa
+                    Dirección exacta
                   </label>
                   <input
                     type="text"
@@ -2283,23 +2379,44 @@ export default function Product() {
                     name="address1"
                     required
                     className="order-input"
-                    placeholder="Calle, número, barrio, ciudad"
+                    placeholder="Calle, Carrera, #, Apto..."
                   />
                 </div>
+
+                {/* Hidden UTM fields */}
+                <input type="hidden" name="utm_source" value={utms.source} />
+                <input type="hidden" name="utm_medium" value={utms.medium} />
+                <input
+                  type="hidden"
+                  name="utm_campaign"
+                  value={utms.campaign}
+                />
+                <input type="hidden" name="utm_content" value={utms.content} />
+                <input type="hidden" name="utm_term" value={utms.term} />
+                <input type="hidden" name="utm_id" value={utms.id} />
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="order-submit-btn cta-btn"
+                  className="w-full bg-blue-600 text-white font-bold py-4 px-4 rounded-lg hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 mt-4"
                 >
-                  <span className="text-17">
-                    {isSubmitting
-                      ? 'Procesando...'
-                      : 'Confirmar Pedido — Pago al Recibir'}
-                  </span>
-                  <span className="btn-sub-text">
-                    Sin tarjeta · Envío gratis · Garantía 30 días
-                  </span>
+                  {isSubmitting ? (
+                    'Procesando...'
+                  ) : (
+                    <>
+                      <span>CONFIRMAR PEDIDO</span>
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                      >
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                      </svg>
+                    </>
+                  )}
                 </button>
               </form>
             </div>
@@ -2385,7 +2502,7 @@ export default function Product() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(formData) => {
-          void submit(formData, {method: 'post'});
+          submit(formData, {method: 'post'});
         }}
         productTitle={product.title}
         productImage={
@@ -2398,6 +2515,7 @@ export default function Product() {
         doublePrice={doublePrice}
         isSubmitting={isSubmitting}
         actionData={actionData}
+        utms={utms}
       />
     </>
   );

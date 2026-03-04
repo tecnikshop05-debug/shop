@@ -16,6 +16,14 @@ type OrderModalProps = {
   doublePrice?: MoneyV2;
   isSubmitting: boolean;
   actionData?: any;
+  utms?: {
+    source: string;
+    medium: string;
+    campaign: string;
+    content: string;
+    term: string;
+    id: string;
+  };
 };
 
 export function OrderModal({
@@ -30,6 +38,7 @@ export function OrderModal({
   doublePrice,
   isSubmitting,
   actionData,
+  utms,
 }: OrderModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [department, setDepartment] = useState('');
@@ -116,7 +125,32 @@ export function OrderModal({
     e.preventDefault();
     if (isSubmitting) return;
 
+    // Track AddPaymentInfo (User is submitting the modal form)
+    // @ts-ignore
+    if (window.fbq) {
+      // @ts-ignore
+      window.fbq('track', 'AddPaymentInfo', {
+        content_name: productTitle,
+        content_ids: variantId ? [variantId] : [],
+        content_type: 'product',
+        value: currentPrice ? parseFloat(currentPrice.amount) : 0,
+        currency: currentPrice?.currencyCode || 'COP',
+        payment_type: 'Contraentrega',
+      });
+    }
+
     const formData = new FormData(e.currentTarget);
+
+    // Parse full name into first and last name
+    const fullName = formData.get('fullName') as string;
+    if (fullName) {
+      const nameParts = fullName.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '.';
+      formData.append('firstName', firstName);
+      formData.append('lastName', lastName);
+    }
+
     formData.append('productTitle', productTitle);
     if (variantId) {
       formData.append('variantId', variantId);
@@ -125,10 +159,7 @@ export function OrderModal({
     formData.append('price', currentPrice?.amount ?? '');
     formData.append('action', 'create_order');
 
-    // Append prefix to phone if not present (handled visually, but ensure data integrity)
-    // The input includes the prefix in the value if user types it, but we can enforce it here if needed.
-    // However, the phone input below will just be the number, we'll prepend +57 in the UI or let the user type.
-    // Actually, better to just let the user type the number and prepend +57 in the action (already done in action).
+    console.log('FormData:', Object.fromEntries(formData.entries()));
 
     onSubmit(formData);
   };
@@ -292,7 +323,7 @@ export function OrderModal({
             </div>
           </div>
 
-          <form id="order-form" onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
               <label
                 htmlFor="fullName"
@@ -305,92 +336,84 @@ export function OrderModal({
                 id="fullName"
                 name="fullName"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Nombre y Apellido"
+                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Juan Pérez"
               />
             </div>
 
-            <PhoneNumberInput />
-
-            <div className="space-y-1" />
+            <PhoneNumberInput required />
 
             <div className="space-y-1">
               <label
                 htmlFor="address1"
                 className="block text-sm font-medium text-gray-700"
               >
-                Dirección de entrega
+                Dirección Exacta
               </label>
               <input
                 type="text"
                 id="address1"
                 name="address1"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Calle, Carrera, #, Apto..."
+                className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Calle 123 # 45-67, Apto 101"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label
-                  htmlFor="province"
+                  htmlFor="department"
                   className="block text-sm font-medium text-gray-700"
                 >
                   Departamento
                 </label>
                 <div className="relative">
                   <select
-                    id="province"
+                    id="department"
                     name="province"
-                    required
                     value={department}
                     onChange={handleDepartmentChange}
-                    className="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none"
+                    required
+                    className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white"
                   >
-                    <option value="">Seleccionar</option>
-                    {DEPARTMENTS.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
+                    <option value="">Seleccionar...</option>
+                    {DEPARTMENTS.map((dep) => (
+                      <option key={dep} value={dep}>
+                        {dep}
                       </option>
                     ))}
                   </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      className="fill-current h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
                     >
-                      <path d="M6 9l6 6 6-6" />
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
                   </div>
                 </div>
               </div>
+
               <div className="space-y-1">
                 <label
                   htmlFor="city"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  Ciudad
+                  Ciudad / Municipio
                 </label>
                 <div className="relative">
                   <select
                     id="city"
                     name="city"
-                    required
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
+                    required
                     disabled={!department}
-                    className="w-full pl-3 pr-8 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white disabled:bg-gray-100 disabled:text-gray-400 appearance-none"
+                    className="w-full px-3 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none bg-white disabled:bg-gray-100 disabled:text-gray-400"
                   >
-                    <option value="">
-                      {department ? 'Seleccionar' : 'Elija Depto'}
-                    </option>
+                    <option value="">Seleccionar...</option>
                     {department &&
                       CITIES[department]?.map((c) => (
                         <option key={c} value={c}>
@@ -398,62 +421,61 @@ export function OrderModal({
                         </option>
                       ))}
                   </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none text-gray-500">
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                     <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                      className="fill-current h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
                     >
-                      <path d="M6 9l6 6 6-6" />
+                      <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
                     </svg>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 border-t border-gray-300 bg-gray-50">
-              <button
-                disabled={isSubmitting}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-bold text-white bg-[var(--confirm)] hover:bg-[#047857] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Procesando...
-                  </span>
-                ) : (
-                  'CONFIRMAR PEDIDO — PAGO AL RECIBIR'
-                )}
-              </button>
-              <p className="text-center text-xs text-gray-500 mt-3">
-                🔒 Tus datos están seguros. Te contactaremos para confirmar el
-                envío.
-              </p>
-            </div>
+            {/* Hidden UTM fields */}
+            {utms && (
+              <>
+                <input type="hidden" name="utm_source" value={utms.source} />
+                <input type="hidden" name="utm_medium" value={utms.medium} />
+                <input
+                  type="hidden"
+                  name="utm_campaign"
+                  value={utms.campaign}
+                />
+                <input type="hidden" name="utm_content" value={utms.content} />
+                <input type="hidden" name="utm_term" value={utms.term} />
+                <input type="hidden" name="utm_id" value={utms.id} />
+              </>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 text-white font-bold py-4 px-4 rounded-lg hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 mt-4"
+            >
+              {isSubmitting ? (
+                'Procesando...'
+              ) : (
+                <>
+                  <span>CONFIRMAR PEDIDO</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
+                </>
+              )}
+            </button>
+            <p className="text-center text-xs text-gray-500 mt-2">
+              🔒 Tus datos están seguros y encriptados.
+            </p>
           </form>
         </div>
       </div>
