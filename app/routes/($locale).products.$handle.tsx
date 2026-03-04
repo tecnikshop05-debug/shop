@@ -821,8 +821,6 @@ export default function Product() {
 
   const isSubmitting = navigation.state === 'submitting';
 
-  console.log({actionData});
-
   useEffect(() => {
     if (actionData?.success) {
       // El modal se encargará de mostrar el mensaje de éxito
@@ -887,6 +885,17 @@ export default function Product() {
       const variant = product.selectedOrFirstAvailableVariant;
       const price = variant?.price?.amount || '0';
       const currency = variant?.price?.currencyCode || 'COP';
+
+      // @ts-ignore
+      window.fbq('track', 'AddToCart', {
+        content_name: product.title,
+        content_ids: variant
+          ? [variant.id.split('/').pop()!]
+          : [product.id.split('/').pop()!],
+        content_type: 'product',
+        value: parseFloat(price),
+        currency: currency,
+      });
 
       // @ts-ignore
       window.fbq('track', 'InitiateCheckout', {
