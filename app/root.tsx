@@ -205,6 +205,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
         {data?.facebookPixelId && (
           <noscript>
             <img
+              alt=""
               height="1"
               width="1"
               style={{display: 'none'}}

@@ -1,6 +1,8 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 export function FacebookReviews() {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   return (
     <section className="sec bg-white border-t border-gray-100" id="reviews">
       <div className="container max-w-2xl mx-auto px-4">
@@ -38,6 +40,7 @@ export function FacebookReviews() {
                 likes: 8,
               },
             ]}
+            onImageClick={setSelectedImage}
           />
 
           {/* Review 2 */}
@@ -49,6 +52,7 @@ export function FacebookReviews() {
             text="Llegó súper rápido a Barranquilla. Lo instalé en 2 minutos. Muy recomendado."
             image="/images/review-cleanbrush-2.jpg"
             likes={124}
+            onImageClick={setSelectedImage}
           />
 
           {/* Review 3 */}
@@ -78,6 +82,7 @@ export function FacebookReviews() {
                 likes: 5,
               },
             ]}
+            onImageClick={setSelectedImage}
           />
 
           {/* Review 4 */}
@@ -89,6 +94,7 @@ export function FacebookReviews() {
             text="Tenía mis dudas sobre la luz UV, pero se siente la diferencia. El cepillo siempre está seco y limpio."
             image="/images/KtjH3a8SwQ.webp"
             likes={56}
+            onImageClick={setSelectedImage}
           />
 
           {/* Review 5 */}
@@ -100,6 +106,7 @@ export function FacebookReviews() {
             text="Lo mejor es que no necesita cables. Se carga con la luz del baño y dura muchísimo. ¡Feliz con mi compra!"
             image="/images/T76GHG2YJ3.webp"
             likes={72}
+            onImageClick={setSelectedImage}
           />
 
           {/* Review 6 */}
@@ -111,9 +118,44 @@ export function FacebookReviews() {
             text="Compré uno para cada baño de la casa. El adhesivo es muy fuerte, no se ha movido ni un milímetro."
             image="/images/XQcPi3ZxWC.webp"
             likes={43}
+            onImageClick={setSelectedImage}
           />
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 animate-fade-in"
+          onClick={() => setSelectedImage(null)}
+          style={{backdropFilter: 'blur(4px)'}}
+        >
+          <button
+            className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors p-2"
+            onClick={() => setSelectedImage(null)}
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <img
+            src={selectedImage}
+            alt="Review Preview"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </section>
   );
 }
@@ -127,6 +169,7 @@ function FacebookReviewCard({
   image,
   likes,
   replies = [],
+  onImageClick,
 }: any) {
   return (
     <div className="flex gap-3 font-sans text-[15px] animate-fade-in">
@@ -147,7 +190,10 @@ function FacebookReviewCard({
         </div>
 
         {image && (
-          <div className="mt-3 max-w-[400px] rounded-xl overflow-hidden border border-gray-200 shadow-sm cursor-pointer hover:opacity-95 transition-opacity">
+          <div
+            className="mt-3 max-w-[400px] rounded-xl overflow-hidden border border-gray-200 shadow-sm cursor-pointer hover:opacity-95 transition-opacity"
+            onClick={() => onImageClick && onImageClick(image)}
+          >
             <img
               src={image}
               alt="Review"

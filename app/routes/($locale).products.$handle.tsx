@@ -5,7 +5,11 @@ import {
   useSubmit,
   useNavigation,
 } from 'react-router';
-import type {LoaderFunctionArgs, ActionFunctionArgs} from 'react-router';
+import type {
+  LoaderFunctionArgs,
+  ActionFunctionArgs,
+  ShouldRevalidateFunction,
+} from 'react-router';
 import {
   getSelectedProductOptions,
   useOptimisticVariant,
@@ -22,12 +26,8 @@ import {PhoneNumberInput} from '~/components/PhoneNumberInput';
 import {DEPARTMENTS, CITIES} from '~/lib/colombia-locations';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {sendFacebookEvent, hashData} from '~/lib/facebook';
-import type {ShouldRevalidateFunction} from 'react-router';
 
-export const shouldRevalidate: ShouldRevalidateFunction = ({
-  formData,
-  formMethod,
-}) => {
+export const shouldRevalidate: ShouldRevalidateFunction = ({formData}) => {
   const actionType = formData?.get('action');
 
   if (actionType === 'create_order') {
@@ -141,7 +141,7 @@ export async function action({request, context}: ActionFunctionArgs) {
           customer: {
             first_name: firstName,
             last_name: lastName,
-            phone: phone,
+            phone,
           },
           line_items: [lineItem],
           shipping_address: {
@@ -151,7 +151,7 @@ export async function action({request, context}: ActionFunctionArgs) {
             city: city || 'Bogotá', // Fallback
             province: province || 'Cundinamarca', // Fallback
             country_code: 'CO',
-            phone: phone,
+            phone,
           },
           billing_address: {
             // Duplicar shipping_address en billing_address
@@ -161,9 +161,9 @@ export async function action({request, context}: ActionFunctionArgs) {
             city: city || 'Bogotá',
             province: province || 'Cundinamarca',
             country_code: 'CO',
-            phone: phone,
+            phone,
           },
-          phone: phone,
+          phone,
           financial_status: 'pending',
           tags: 'Contraentrega, LandingPage',
           payment_gateway_names: ['manual'],
@@ -388,7 +388,7 @@ export async function loader(args: LoaderFunctionArgs) {
               fbp: cookies._fbp,
             },
             custom_data: {
-              currency: currency,
+              currency,
               value: parseFloat(price),
               content_name: product.title,
               content_ids: variant
@@ -728,7 +728,7 @@ export default function Product() {
             : [product.id.split('/').pop()!],
           content_type: 'product',
           value: parseFloat(price),
-          currency: currency,
+          currency,
         },
         {eventID: eventId},
       );
@@ -740,7 +740,8 @@ export default function Product() {
     getAdjacentAndFirstAvailableVariants(product),
   );
   const selectedOptionsForUrl = selectedVariant.selectedOptions.filter(
-    (option) => !(option.name === 'Title' && option.value === 'Default Title'),
+    (option: {name: string; value: string}) =>
+      !(option.name === 'Title' && option.value === 'Default Title'),
   );
   useSelectedOptionInUrlParam(selectedOptionsForUrl);
 
@@ -864,7 +865,7 @@ export default function Product() {
               : [product.id.split('/').pop()!],
             content_type: 'product',
             value: parseFloat(price),
-            currency: currency,
+            currency,
             order_id: actionData.orderId,
             num_items: selectedKit, // Assuming 1 kit = 1 item in logic, but actually 2 units if kit 2
           },
@@ -913,7 +914,7 @@ export default function Product() {
           : [product.id.split('/').pop()!],
         content_type: 'product',
         value: parseFloat(price),
-        currency: currency,
+        currency,
       });
 
       // @ts-ignore
@@ -924,7 +925,7 @@ export default function Product() {
           : [product.id.split('/').pop()!],
         content_type: 'product',
         value: parseFloat(price),
-        currency: currency,
+        currency,
         num_items: selectedKit,
       });
     }
@@ -998,7 +999,7 @@ export default function Product() {
           : [product.id.split('/').pop()!],
         content_type: 'product',
         value: parseFloat(price),
-        currency: currency,
+        currency,
         payment_type: 'Contraentrega',
       });
     }
@@ -1157,13 +1158,38 @@ export default function Product() {
 
         {/* Info */}
         <div className="info">
-          <div className="eyebrow" style={{marginBottom: '10px'}}>
-            {product.title} Original
+          <div
+            className="eyebrow"
+            style={{
+              marginBottom: '10px',
+              fontSize: '12px',
+              fontWeight: 800,
+              letterSpacing: '0.1em',
+              color: '#3B82F6', // Blue primary
+              textTransform: 'uppercase',
+            }}
+          >
+            CLEANBRUSH® UV: ESTERILIZACIÓN AUTOMÁTICA
           </div>
 
           <h1 className="h1" style={{marginBottom: '10px'}}>
-            Elimina el 99.9% de bacterias y organiza tu baño en segundos
+            Tu cepillo de dientes tiene bacterias ahora mismo.
+            <br />
+            <span style={{color: '#64748B'}}>
+              ¿Cuándo fue la última vez que lo desinfectaste?
+            </span>
           </h1>
+          <p
+            className="body-sm"
+            style={{
+              marginBottom: '14px',
+              color: '#475569',
+              fontSize: '16px',
+              fontWeight: 500,
+            }}
+          >
+            La solución que se activa sola mientras duermes.
+          </p>
 
           <a
             href="#reviews"
@@ -1188,15 +1214,17 @@ export default function Product() {
           <p
             className="body"
             style={{
-              maxWidth: '420px',
-              marginBottom: '20px',
+              maxWidth: '460px',
+              marginBottom: '24px',
               fontSize: '15px',
-              color: '#4B5563',
+              lineHeight: '1.6',
+              color: '#334155',
             }}
           >
-            Mata el 99.9% de bacterias con luz UV-C clínica. Dispensador
-            automático, carga solar + USB y 5 ranuras organizadoras. Todo el
-            baño en orden, sin esfuerzo.
+            Mata el <strong>99.9% de bacterias</strong> con luz UV-C clínica.
+            Dispensador automático, carga solar + USB y 5 ranuras organizadoras.{' '}
+            <br />
+            <strong>Todo el baño en orden, sin esfuerzo.</strong>
           </p>
 
           <div
@@ -1304,8 +1332,8 @@ export default function Product() {
                 <use href="#i-germ" />
               </svg>
               <span>
-                <strong>UV-C automático</strong> — Esteriliza al guardar el
-                cepillo. Sin botones, sin olvidos.
+                <strong>Elimina el 99.9% de bacterias automáticamente</strong> —
+                sin remojo, sin recordar.
               </span>
             </div>
             <div className="bullet">
@@ -1317,8 +1345,8 @@ export default function Product() {
                 <use href="#i-touch" />
               </svg>
               <span>
-                <strong>Dispensador infrarrojo</strong> — Pasta sin tocar nada.
-                Cero desorden.
+                <strong>Dispensa la pasta sin tocar el tubo</strong> — más
+                higiene, menos desperdicio.
               </span>
             </div>
             <div className="bullet">
@@ -1330,21 +1358,8 @@ export default function Product() {
                 <use href="#i-solar" />
               </svg>
               <span>
-                <strong>Solar + USB</strong> — Carga con el bombillo del baño.
-                Sin pilas.
-              </span>
-            </div>
-            <div className="bullet">
-              <svg
-                className="bullet-ico"
-                viewBox="0 0 24 24"
-                color="var(--blue)"
-              >
-                <use href="#i-usb" />
-              </svg>
-              <span>
-                <strong>5 ranuras organizadoras</strong> — Hilo, rasuradora,
-                raspador de lengua y más.
+                <strong>Se recarga con luz solar</strong> — sin pilas, sin
+                cables, sin interrupciones.
               </span>
             </div>
           </div>
@@ -1684,7 +1699,7 @@ export default function Product() {
             }}
           >
             {[
-              '/snaptik_7577863751999753479_v3.mp4',
+              '/WhatsApp Video 2026-03-03 at 15.24.09.mp4',
               '/snaptik_7513300600126180609_v3.mp4',
               '/videoplayback.mp4',
             ].map((videoSrc, idx) => (
@@ -2011,42 +2026,96 @@ export default function Product() {
             <table className="cmp-tbl">
               <thead>
                 <tr>
-                  <th>Características</th>
-                  <th className="us">CleanBrush® UV</th>
-                  <th className="th">Portacepillos Común</th>
-                  <th className="th">Vaso Tradicional</th>
+                  <th style={{width: '30%'}}>Característica</th>
+                  <th className="us" style={{width: '35%'}}>
+                    CleanBrush® UV
+                  </th>
+                  <th className="th" style={{width: '35%'}}>
+                    Otros métodos
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Esterilización UV Certificada</td>
-                  <td className="us ck">Sí, 99.9%</td>
-                  <td className="cx">No</td>
-                  <td className="cx">No</td>
+                  <td className="font-bold text-slate-700">Esterilización</td>
+                  <td className="us ck">
+                    <strong>99.9% Automática (UV-C)</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Sin químicos, sin sabor
+                    </span>
+                  </td>
+                  <td className="cx">
+                    <strong>Manual / Químicos</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Listerine, Peróxido, Agua caliente
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td>Secado de cepillos</td>
-                  <td className="us ck">Sí, vertical</td>
-                  <td className="cx">A veces</td>
-                  <td className="cx">No (humedad)</td>
+                  <td className="font-bold text-slate-700">Comodidad</td>
+                  <td className="us ck">
+                    <strong>0 Esfuerzo</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Se activa solo al guardar el cepillo
+                    </span>
+                  </td>
+                  <td className="cx">
+                    <strong>Requiere Disciplina</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Debes recordar hacerlo cada noche
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td>Dispensador de crema</td>
-                  <td className="us ck">Sí, automático</td>
-                  <td className="cx">No</td>
-                  <td className="cx">No</td>
+                  <td className="font-bold text-slate-700">Secado</td>
+                  <td className="us ck">
+                    <strong>Vertical + Aireado</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Previene moho y olores
+                    </span>
+                  </td>
+                  <td className="cx">
+                    <strong>Húmedo</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Vaso o estuche (caldo de cultivo)
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td>Carga Solar (Sin cables)</td>
-                  <td className="us ck">Sí</td>
-                  <td className="cx">N/A</td>
-                  <td className="cx">N/A</td>
+                  <td className="font-bold text-slate-700">Orden</td>
+                  <td className="us ck">
+                    <strong>Todo en 1 lugar</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Dispensador + 4 cepillos + Accesorios
+                    </span>
+                  </td>
+                  <td className="cx">
+                    <strong>Desorden</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Tubos espichados y cepillos regados
+                    </span>
+                  </td>
                 </tr>
                 <tr>
-                  <td>Instalación</td>
-                  <td className="us">Adhesivo (1 min)</td>
-                  <td>Taladro / Clavos</td>
-                  <td>Mesa</td>
+                  <td className="font-bold text-slate-700">Resultado</td>
+                  <td className="us ck">
+                    <strong>Salud Oral Superior</strong>
+                  </td>
+                  <td className="cx">
+                    <strong>Riesgo de Infección</strong>
+                    <br />
+                    <span className="text-xs text-slate-500">
+                      Millones de bacterias acumuladas
+                    </span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -2568,7 +2637,7 @@ export default function Product() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={(formData) => {
-          submit(formData, {method: 'post'});
+          void submit(formData, {method: 'post'});
         }}
         productTitle={product.title}
         productImage={
